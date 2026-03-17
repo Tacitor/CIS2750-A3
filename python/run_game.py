@@ -22,6 +22,6 @@ def main() -> None:
 
     game_ui = GameUI(os.path.abspath(args.config), os.path.abspath(args.profile))
     game_ui.launch()
-    
+
 if __name__ == "__main__":
     raise SystemExit(main())
