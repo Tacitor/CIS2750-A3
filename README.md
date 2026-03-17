@@ -21,3 +21,7 @@ Date: 27 Mar 2026
 1. `loader_load_world()` will return `NULL_POINTER` if any of the output pointer are `NULL`
 2. `room_is_walkable()` will return `false` if `floor_grid` is `NULL`
 3. `room_render()` will return `INVALID_ARGUMENT` if `floor_grid` is `NULL`
+
+
+## Additional documentation from A3
+1. Made use of the curses demo provided in class.

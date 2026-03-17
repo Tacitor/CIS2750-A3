@@ -9,6 +9,7 @@ provided in the UI lectures.
 """
 import argparse
 import os
+from treasure_runner.ui.game_ui import GameUI
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Treasure Runner game")
@@ -18,9 +19,9 @@ def main() -> None:
     parser.add_argument("--profile", type=str, required=True, metavar="<path>",
                         help="A JSON profile file that tracks player statistics")
     args = parser.parse_args()
-    
-    print("Go Time: " + os.path.abspath(args.config) + ", and: " + os.path.abspath(args.profile))
-    # run_integration(os.path.abspath(args.config), os.path.abspath(args.log), False)
+
+    game_ui = GameUI(os.path.abspath(args.config), os.path.abspath(args.profile))
+    game_ui.launch()
     
 if __name__ == "__main__":
     raise SystemExit(main())
