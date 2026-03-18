@@ -7,7 +7,7 @@ class GameUI:
     def __init__(self, config_path: str, profile_path: str):
         self._config = config_path
         self._profile = profile_path
-        self._eng = GameEngine(self._config);
+        self._eng = GameEngine(self._config)
 
         print("UI Time: " + self._profile + ", " + self._config)
 
@@ -35,34 +35,34 @@ class GameUI:
 
     def _ui_main_game(self, stdscr):
         game_element_offset = 30
-        
+
         user_input = ord('z')
         while user_input != ord('q'):
             stdscr.clear()
             stdscr.addstr(0, 0, "<<message bar here>>")
             stdscr.addstr(1, 0, "<<room number and name here>>")
-        
+
             room_str = self._eng.render_current_room()
             room_row = 3
             room_col = 0
-            player_x, player_y = self._eng.player.get_position();
+            player_x, player_y = self._eng.player.get_position()
             stdscr.addstr(room_row, room_col, room_str)
             stdscr.addch(room_row + player_y, room_col + player_x, "@", curses.color_pair(2))
-            
+
             stdscr.addstr(3, game_element_offset, "Game Elements:")
             stdscr.addstr(5, game_element_offset, "@ - Julia")
             stdscr.addstr(6, game_element_offset, "# - wall")
             stdscr.addstr(7, game_element_offset, "$ - gold")
             stdscr.addstr(8, game_element_offset, "X - portal")
             stdscr.addstr(9, game_element_offset, "<<other elements/names here>>")
-            
+
             stdscr.addstr(20, 0, "Game Controls: <<list the keys used to control the game>>")
             stdscr.addstr(22, 0, "<< Player Status bar here (e.g. gold collected, rooms played, rooms left>>")
             stdscr.addstr(23, 0, "<<A title for your game here>>\t\t\t<<your email address here>>")
             stdscr.refresh()
 
             user_input = stdscr.getch()
-            
+
             if user_input == ord('w'):
                 self._eng.move_player(Direction.NORTH)
             elif user_input == ord('a'):
