@@ -2,12 +2,15 @@
 import curses
 from treasure_runner.models.game_engine import GameEngine
 from treasure_runner.bindings import Direction
+from treasure_runner.models.exceptions import GameEngineError, ImpassableError
 
 class GameUI:
     def __init__(self, config_path: str, profile_path: str):
         self._config = config_path
         self._profile = profile_path
         self._eng = GameEngine(self._config)
+
+        self._message_bar = "Start by moving around"
 
     def launch(self):
         print("Launching the TUI...")
@@ -37,7 +40,7 @@ class GameUI:
         user_input = ord('z')
         while user_input != ord('q'):
             stdscr.clear()
-            stdscr.addstr(0, 0, "<<message bar here>>")
+            stdscr.addstr(0, 0, self._message_bar)
             stdscr.addstr(1, 0, "<<room number and name here>>")
 
             room_str = self._eng.render_current_room()
@@ -59,8 +62,12 @@ class GameUI:
             stdscr.addstr(23, 0, "<<A title for your game here>>\t\t\t<<your email address here>>")
             stdscr.refresh()
 
-            user_input = stdscr.getch()
+            user_input = self._get_user_input(stdscr)
 
+    def _get_user_input(self, stdscr) -> int:
+        user_input = stdscr.getch()
+
+        try:
             if user_input == ord('w'):
                 self._eng.move_player(Direction.NORTH)
             elif user_input == ord('a'):
@@ -69,6 +76,14 @@ class GameUI:
                 self._eng.move_player(Direction.SOUTH)
             elif user_input == ord('d'):
                 self._eng.move_player(Direction.EAST)
+
+            self._message_bar = ""
+        except ImpassableError:
+            self._message_bar = "You can't go that way!"
+        except GameEngineError:
+            self._message_bar = "The GameEngine had a GameEngineError"
+
+        return user_input
 
     def _splash_startup(self, stdscr):
         stdscr.clear()
