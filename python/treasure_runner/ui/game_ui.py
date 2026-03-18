@@ -9,8 +9,6 @@ class GameUI:
         self._profile = profile_path
         self._eng = GameEngine(self._config)
 
-        print("UI Time: " + self._profile + ", " + self._config)
-
     def launch(self):
         print("Launching the TUI...")
         curses.wrapper(self._run_tui)
@@ -87,7 +85,7 @@ class GameUI:
         stdscr.addstr(4, 0, "Player name:")
         stdscr.addstr(5, 0, "Games played:")
         stdscr.addstr(6, 0, "Treasure high score:")
-        stdscr.addstr(7, 0, "Most rooms world completed:")
+        stdscr.addstr(7, 0, "Biggest world completed:")
         stdscr.addstr(8, 0, "Last played:")
         stdscr.addstr(10, 0, "Press any key to continue...")
         stdscr.refresh() # Screen is redrawn — not printed

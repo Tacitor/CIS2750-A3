@@ -22,4 +22,4 @@ pyhtml:
 	python3 -m coverage html -d coverage_html
 
 play:
-	python3 run_game.py --config /workspace/assets/starter.ini --profile /workspace/assets/test.json
+	python3 run_game.py --config ../assets/starter.ini --profile ../assets/test.json
