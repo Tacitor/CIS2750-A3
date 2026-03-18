@@ -30,6 +30,7 @@ class GameUI:
         stdscr.clear() #'stdscr' is the main window
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
         curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
         self._splash_startup(stdscr)
         self._splash_player_info(stdscr)
@@ -43,7 +44,7 @@ class GameUI:
         game_element_offset = 30
 
         user_input = ord('z')
-        while user_input != ord('q'):
+        while user_input != ord('q') and user_input != ord('Q'):
             # TODOFIXME: Update this
             self._lowest_str = 23
             # TODOFIXME: Update this
@@ -58,7 +59,7 @@ class GameUI:
             room_col = 0
             player_x, player_y = self._eng.player.get_position()
             safe_addstr(stdscr, room_row, room_col, room_str)
-            #TODOFIXME: Make safe?
+            # TODOFIXME: Make safe?
             stdscr.addch(room_row + player_y, room_col + player_x, "@", curses.color_pair(2))
 
             safe_addstr(stdscr, 3, game_element_offset, "Game Elements:")
@@ -79,13 +80,13 @@ class GameUI:
         user_input = stdscr.getch()
 
         try:
-            if user_input == ord('w'):
+            if user_input == ord('w') or user_input == 259 or user_input == ord('W'):
                 self._eng.move_player(Direction.NORTH)
-            elif user_input == ord('a'):
+            elif user_input == ord('a') or user_input == 260 or user_input == ord('A'):
                 self._eng.move_player(Direction.WEST)
-            elif user_input == ord('s'):
+            elif user_input == ord('s') or user_input == 258 or user_input == ord('S'):
                 self._eng.move_player(Direction.SOUTH)
-            elif user_input == ord('d'):
+            elif user_input == ord('d') or user_input == 261 or user_input == ord('D'):
                 self._eng.move_player(Direction.EAST)
 
             self._message_bar = ""
@@ -119,7 +120,7 @@ class GameUI:
         safe_addstr(stdscr, 6, 0, "Treasure high score:")
         safe_addstr(stdscr, 7, 0, "Biggest world completed:")
         safe_addstr(stdscr, 8, 0, "Last played:")
-        safe_addstr(stdscr, 10, 5, "Press any key to continue...")
+        safe_addstr_colour(stdscr, 10, 5, "Press any key to continue...", curses.color_pair(3))
         stdscr.refresh() # Screen is redrawn — not printed
 
         char = stdscr.getch() # Waits for a single key press (no Enter required)
