@@ -1,4 +1,4 @@
-.PHONY: rig rib ric pl pycov pyhtml play
+.PHONY: rig rib ric pl pycov pyhtml play dist cmt
 
 rig:
 	python3 run_integration.py --config "/workspace/assets/integration.ini" --log "/workspace/assets/integration_run.log"
@@ -23,3 +23,9 @@ pyhtml:
 
 play:
 	python3 run_game.py --config ../assets/pushables.ini --profile ../assets/test.json
+
+dist:
+	@$(MAKE) -C .. dist
+
+cmt:
+	@$(MAKE) -C ../c mt
