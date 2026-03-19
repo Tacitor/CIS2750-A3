@@ -90,7 +90,7 @@ class GameUI:
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
         # TODOFIXME: Implement this
         safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: " + str(self._eng.player.get_collected_count()) + " gold collected, 1 room(s) played, 4 room(s) left")
-        # TODOFIXME: What kind of name needs to go here? From the .json? Are these lifetime stats of the profile, or just status or current game?
+        # TODOFIXME: Put name from the .json here. Considered a room played once all the treasures in this room have been collected.
         safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, "<NAME> Status:", curses.color_pair(4))
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
 
@@ -119,6 +119,8 @@ class GameUI:
 
     def _get_user_input(self, stdscr) -> int:
         user_input = stdscr.getch()
+        self._message_bar = ""
+        self._message_bar_colour = 0
 
         try:
             if user_input == ord('w') or user_input == 259 or user_input == ord('W'):
@@ -129,10 +131,15 @@ class GameUI:
                 self._eng.move_player(Direction.SOUTH)
             elif user_input == ord('d') or user_input == 261 or user_input == ord('D'):
                 self._eng.move_player(Direction.EAST)
+            elif user_input == ord('r') or user_input == ord('R'):
+                self._message_bar = "The game as been reset"
+                self._message_bar_colour = 4
+                self._eng.reset()
+            elif user_input == ord('>'):
+                # TODOFIXME: Add this. There should be a message for successful teleportation and another for if the player is not on/near a portal
+                self._message_bar = "This form of portal travel has not been added yet"
 
-            # TODOFIXME: Add message bar text for treasure collection, for reset of the game, and for portal teleportation.
-            self._message_bar = ""
-            self._message_bar_colour = 0
+            # TODOFIXME: Add message bar text for treasure collection
         except ImpassableError:
             self._message_bar = "You can't go that way!"
             self._message_bar_colour = 2
