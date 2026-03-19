@@ -8,4 +8,6 @@ Status game_engine_parse_treasure(const Treasure * const *treasures, int treasur
 
 Status game_engine_get_room_name(const GameEngine *eng, char **name_out);
 
+const Charset *game_engine_get_charset(const GameEngine *eng);
+
 #endif /* MY_GAME_ENGINE_H */

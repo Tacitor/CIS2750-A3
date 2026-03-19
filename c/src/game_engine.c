@@ -59,11 +59,19 @@ void game_engine_destroy(GameEngine *eng) {
 }
 
 const Player *game_engine_get_player(const GameEngine *eng) {
-    if (eng == NULL) {
+    if (eng == NULL || eng->player == NULL) {
         return NULL;
     }
     
     return eng->player;
+}
+
+const Charset *game_engine_get_charset(const GameEngine *eng) {
+    if (eng == NULL) {
+        return NULL;
+    }
+    
+    return &(eng->charset);
 }
 
 static Status internal_get_room_from_id(const GameEngine *eng, int room_id, const Room **room_out) {

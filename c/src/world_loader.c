@@ -234,6 +234,8 @@ Status loader_load_world(const char *config_file,
     charset_out->pushable = dg_set->pushable;
     charset_out->treasure = dg_set->treasure;
     charset_out->wall = dg_set->wall;
+    charset_out->switch_on = dg_set->switch_on;
+    charset_out->switch_off = dg_set->switch_off;
 
     stop_datagen();
 
