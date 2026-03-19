@@ -98,7 +98,7 @@ class GameUI:
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
         # TODOFIXME: Implement this
-        safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: 0 gold collected, 1 room(s) played, 4 room(s) left")
+        safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: " + str(self._eng.player.get_collected_count()) + " gold collected, 1 room(s) played, 4 room(s) left")
         # TODOFIXME: What kind of name needs to go here? From the .json? Are these lifetime stats of the profile, or just status or current game?
         safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, "<NAME> Status:", curses.color_pair(4))
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
