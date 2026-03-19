@@ -67,12 +67,12 @@ class GameUI:
     def _ui_render_room(self, stdscr, room_row):
         room_str = self._eng.render_current_room()
         player_x, player_y = self._eng.player.get_position()
+        charset = self._eng.get_charset()
         safe_addstr(stdscr, room_row, 0, room_str)
         # TODOFIXME: Make safe?
-        stdscr.addch(room_row + player_y, 0 + player_x, "@", curses.color_pair(2))
+        stdscr.addch(room_row + player_y, 0 + player_x, charset.contents.player.decode("utf-8"), curses.color_pair(2))
 
     def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
-        game_element_width_offset = room_width + 5
         game_element_height_offset = room_height + room_row + 1
 
         side_bar_lowest = 10
@@ -80,15 +80,7 @@ class GameUI:
         term_y, term_x = stdscr.getmaxyx()
         term_y += 1 # Useless operation on this var to let the linter be happy
 
-        safe_addstr(stdscr, 3, game_element_width_offset, "Game Elements:")
-        # TODOFIXME: Pull correct char set from the GE
-        safe_addstr(stdscr, 5, game_element_width_offset, "@ - Julia")
-        safe_addstr_colour(stdscr, 5, game_element_width_offset, "@", curses.color_pair(2))
-        safe_addstr(stdscr, 6, game_element_width_offset, "# - wall")
-        safe_addstr(stdscr, 7, game_element_width_offset, "$ - gold")
-        safe_addstr(stdscr, 8, game_element_width_offset, "X - portal")
-        safe_addstr(stdscr, 9, game_element_width_offset, ". - floor")
-        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, "O - pushable obstacle")
+        self._ui_render_side_bar(stdscr, room_width, side_bar_lowest)
 
         if game_element_height_offset < side_bar_lowest + 2:
             game_element_height_offset = side_bar_lowest + 2
@@ -103,6 +95,21 @@ class GameUI:
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
 
         self._ui_render_email(stdscr, term_x, game_element_height_offset)
+
+    def _ui_render_side_bar(self, stdscr, room_width, side_bar_lowest):
+        game_element_width_offset = room_width + 5
+
+        safe_addstr(stdscr, 3, game_element_width_offset, "Game Elements:")
+        charset = self._eng.get_charset()
+        safe_addstr(stdscr, 5, game_element_width_offset, charset.contents.player.decode("utf-8") + " - Julia")
+        safe_addstr_colour(stdscr, 5, game_element_width_offset, charset.contents.player.decode("utf-8"), curses.color_pair(2))
+        safe_addstr(stdscr, 6, game_element_width_offset, charset.contents.wall.decode("utf-8") + " - wall")
+        safe_addstr(stdscr, 7, game_element_width_offset, charset.contents.treasure.decode("utf-8") + " - gold")
+        safe_addstr(stdscr, 8, game_element_width_offset, charset.contents.portal.decode("utf-8") + " - portal")
+        safe_addstr(stdscr, 9, game_element_width_offset, charset.contents.floor.decode("utf-8") + " - floor")
+        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset.contents.pushable.decode("utf-8") + " - pushable obstacle")
+        # safe_addstr(stdscr, 11, game_element_width_offset, charset.contents.switch_off.decode("utf-8") + " - switch off")
+        # safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset.contents.switch_on.decode("utf-8") + " - switch on")
 
     def _ui_render_email(self, stdscr, term_x, game_element_height_offset):
         email_pos = term_x - len(self.email)
