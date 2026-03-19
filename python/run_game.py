@@ -17,7 +17,7 @@ def main() -> None:
                         help="Path to the INI configuration file used to create the game world")
 
     parser.add_argument("--profile", type=str, required=True, metavar="<path>",
-                        help="A JSON profile file that tracks player statistics")
+                        help="A JSON profile file that tracks player statistics. If the path does not point to an existing profile, a new one will be created.")
     args = parser.parse_args()
 
     game_ui = GameUI(os.path.abspath(args.config), os.path.abspath(args.profile))

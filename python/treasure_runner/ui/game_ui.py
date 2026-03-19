@@ -10,7 +10,12 @@ class GameUI:
         self._profile = profile_path
         self._eng = GameEngine(self._config)
 
+        self.game_name = "Julia's Jubilant Journey"
+        self.email = "lkrampit@uoguelph.ca"
+        self.game_controls = "Game Controls: Arrow-keys/WASD to move, > to use a portal, q to quit, and r to reset whole game."
+
         self._message_bar = "Start by moving around"
+        self._message_bar_colour = 4
 
     def launch(self):
         print("Launching the TUI...")
@@ -30,6 +35,7 @@ class GameUI:
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
         curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
         self._splash_startup(stdscr)
         self._splash_player_info(stdscr)
@@ -47,9 +53,12 @@ class GameUI:
             room_width, room_height = self._eng.get_room_dimensions()
             game_element_width_offset = room_width + 5
             game_element_height_offset = room_height + room_row + 1
+            term_y, term_x = stdscr.getmaxyx()
+            term_y += 1 # Useless operation on this var to let the linter be happy
 
             stdscr.clear()
-            safe_addstr(stdscr, 0, 0, self._message_bar)
+            safe_addstr_colour(stdscr, 0, 0, self._message_bar, curses.color_pair(self._message_bar_colour))
+            # TODOFIXME: Add this.
             safe_addstr(stdscr, 1, 0, "<<room number and name here>>")
 
             room_str = self._eng.render_current_room()
@@ -58,19 +67,32 @@ class GameUI:
             # TODOFIXME: Make safe?
             stdscr.addch(room_row + player_y, room_col + player_x, "@", curses.color_pair(2))
 
-            side_bar_lowest = 9
+            side_bar_lowest = 10
             safe_addstr(stdscr, 3, game_element_width_offset, "Game Elements:")
+            # TODOFIXME: Pull correct char set from the GE
             safe_addstr(stdscr, 5, game_element_width_offset, "@ - Julia")
+            safe_addstr_colour(stdscr, 5, game_element_width_offset, "@", curses.color_pair(2))
             safe_addstr(stdscr, 6, game_element_width_offset, "# - wall")
             safe_addstr(stdscr, 7, game_element_width_offset, "$ - gold")
             safe_addstr(stdscr, 8, game_element_width_offset, "X - portal")
-            safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, "<<other elements/names here>>")
+            safe_addstr(stdscr, 9, game_element_width_offset, ". - floor")
+            safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, "O - pushable obstacle")
 
-            if (game_element_height_offset < side_bar_lowest + 2):
+            if game_element_height_offset < side_bar_lowest + 2:
                 game_element_height_offset = side_bar_lowest + 2
-            safe_addstr(stdscr, game_element_height_offset, 0, "Game Controls: <<list the keys used to control the game>>")
-            safe_addstr(stdscr, game_element_height_offset + 1, 0, "<< Player Status bar here (e.g. gold collected, rooms played, rooms left>>")
-            safe_addstr(stdscr, game_element_height_offset + 2, 0, "<<A title for your game here>>\t\t\t<<your email address here>>")
+            # TODOFIXME: Add > portal traversal support.
+            # TODOFIXME: Add r to reset support.
+            safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
+            safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
+            # TODOFIXME: Implement this
+            safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: 0 gold collected, 1 room(s) played, 4 room(s) left")
+            # TODOFIXME: What kind of name needs to go here? From the .json? Are these lifetime stats of the profile, or just status or current game?
+            safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, "<NAME> Status:", curses.color_pair(4))
+            safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
+            email_pos = term_x - len(self.email)
+            if len(self.game_controls) < term_x:
+                email_pos = len(self.game_controls) - len(self.email)
+            safe_addstr(stdscr, game_element_height_offset + 3, email_pos, self.email)
             stdscr.refresh()
 
             user_input = self._get_user_input(stdscr)
@@ -88,19 +110,21 @@ class GameUI:
             elif user_input == ord('d') or user_input == 261 or user_input == ord('D'):
                 self._eng.move_player(Direction.EAST)
 
+            # TODOFIXME: Add message bar text for treasure collection, for reset of the game, and for portal teleportation.
             self._message_bar = ""
-            # TODOFIXME: Remove this
-            self._message_bar = str(user_input)
+            self._message_bar_colour = 0
         except ImpassableError:
             self._message_bar = "You can't go that way!"
+            self._message_bar_colour = 2
         except GameEngineError:
             self._message_bar = "The GameEngine had a GameEngineError"
+            self._message_bar_colour = 1
 
         return user_input
 
     def _splash_startup(self, stdscr):
         stdscr.clear()
-        safe_addstr_colour(stdscr, 0, 0, "Julia's Jubilant Journey", curses.color_pair(1))
+        safe_addstr_colour(stdscr, 0, 0, self.game_name, curses.color_pair(1))
         safe_addstr_colour(stdscr, 1, 0, "is a Sokoban-style puzzle game.", curses.color_pair(2))
         safe_addstr_colour(stdscr, 2, 0, "Take control of Julia as she explores a world of mazes on her search for treasures.", curses.color_pair(2))
 
