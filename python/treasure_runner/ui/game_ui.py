@@ -55,8 +55,7 @@ class GameUI:
             stdscr.clear()
 
             safe_addstr_colour(stdscr, 0, 0, self._message_bar, curses.color_pair(self._message_bar_colour))
-            # TODOFIXME: Add this.
-            safe_addstr(stdscr, 1, 0, "<<room number and name here>>")
+            safe_addstr(stdscr, 1, 0, "Room " + str(self._eng.player.get_room()) + " \"" + self._eng.get_room_name() + "\"")
 
             self._ui_render_room(stdscr, room_row)
             self._ui_render_side_bar_and_status(stdscr, room_row, room_width, room_height)

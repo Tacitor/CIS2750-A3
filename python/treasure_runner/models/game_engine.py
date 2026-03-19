@@ -71,6 +71,15 @@ class GameEngine:
 
         raise status_to_exception(stat, "ERROR: failed to get the dimensions of the current room. Status: " + str(stat))
 
+    def get_room_name(self) -> str:
+        c_string_name = c_char_p()
+        stat = lib.game_engine_get_room_name(self._eng, byref(c_string_name))
+
+        if stat == Status.OK:
+            return c_string_name.value.decode("utf-8")
+
+        raise status_to_exception(stat, "ERROR: failed to get the name of the current room. Status: " + str(stat))
+
     def get_room_ids(self) -> list[int]:
         all_ids = POINTER(c_int)()
         id_count = c_int()

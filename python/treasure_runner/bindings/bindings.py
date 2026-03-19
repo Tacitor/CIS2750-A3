@@ -149,6 +149,10 @@ lib.game_engine_get_room_count.restype = c_int
 lib.game_engine_get_room_dimensions.argtypes = [GameEngine, POINTER(c_int), POINTER(c_int)]
 lib.game_engine_get_room_dimensions.restype = c_int
 
+# Status game_engine_get_room_name(const GameEngine *eng, char **name_out)
+lib.game_engine_get_room_name.argtypes = [GameEngine, POINTER(ctypes.c_char_p)]
+lib.game_engine_get_room_name.restype = c_int
+
 # Status game_engine_get_room_ids(const GameEngine *eng, int **ids_out, int *count_out);
 lib.game_engine_get_room_ids.argtypes = [GameEngine, POINTER(POINTER(c_int)), POINTER(c_int)]
 lib.game_engine_get_room_ids.restype = c_int
