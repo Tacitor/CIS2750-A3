@@ -3,7 +3,7 @@ from ctypes import (
     c_int, c_double, c_char_p, c_size_t, c_void_p, POINTER, byref
 )
 
-from ..bindings import Direction, lib, Status
+from ..bindings import Direction, lib, Status, Charset
 from .exceptions import GameEngineError, status_to_exception
 from .player import Player
 
@@ -79,6 +79,14 @@ class GameEngine:
             return c_string_name.value.decode("utf-8")
 
         raise status_to_exception(stat, "ERROR: failed to get the name of the current room. Status: " + str(stat))
+
+    def get_charset(self) -> Charset:
+        char_set = lib.game_engine_get_charset(self._eng)
+
+        if char_set is None:
+            raise RuntimeError("ERROR: failed to get the charset from the GameEngine")
+
+        return char_set
 
     def get_room_ids(self) -> list[int]:
         all_ids = POINTER(c_int)()

@@ -68,6 +68,17 @@ class Treasure(ctypes.Structure):
         ("collected", ctypes.c_bool),
     ]
 
+class Charset(ctypes.Structure):
+    _fields_ = [
+        ("wall", ctypes.c_char),
+        ("floor", ctypes.c_char),
+        ("player", ctypes.c_char),
+        ("pushable", ctypes.c_char),
+        ("treasure", ctypes.c_char),
+        ("portal", ctypes.c_char),
+        ("switch_off", ctypes.c_char),
+        ("switch_on", ctypes.c_char)
+    ]
 
 # ============================================================
 # Library Loading
@@ -160,6 +171,10 @@ lib.game_engine_get_room_ids.restype = c_int
 # Status game_engine_reset(GameEngine *eng);
 lib.game_engine_reset.argtypes = [GameEngine]
 lib.game_engine_reset.restype = c_int
+
+# const Charset *game_engine_get_charset(const GameEngine *eng)
+lib.game_engine_get_charset.argtypes = [GameEngine]
+lib.game_engine_get_charset.restype = POINTER(Charset)
 
 # ============================================================
 # C Function Signatures - Player

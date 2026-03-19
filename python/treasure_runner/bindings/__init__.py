@@ -10,7 +10,8 @@ from .bindings import (
     GameEngineStatus,
     Direction,
     Status,
-    Treasure
+    Treasure,
+    Charset
 )
 
 # For compatibility
@@ -23,4 +24,5 @@ __all__ = [
     'Status',
     'Treasure',
     'GameEngineBinding',
+    'Charset',
 ]
