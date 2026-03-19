@@ -124,6 +124,36 @@ static void deep_copy_pushables(DG_Room dg_room, Room *game_room) {
     }
 }
 
+static char* room_id_to_name(int id) {
+    char* name = NULL;
+
+    switch (id) {
+        case 0:
+            name = "Start";
+            break;
+        case 1:
+            name = "First";
+            break;
+        case 2:
+            name = "Second";
+            break;
+        case 3:
+            name = "Third";
+            break;
+        case 4:
+            name = "Fourth";
+            break;
+        case 5:
+            name = "Fifth";
+            break;
+        default:
+            name = "Regular";
+            break;
+    }
+
+    return name;
+}
+
 Status loader_load_world(const char *config_file,
                          Graph **graph_out,
                          Room **first_room_out,
@@ -161,7 +191,7 @@ Status loader_load_world(const char *config_file,
     while (has_more_rooms()) {
         DG_Room dg_room = get_next_room();
 
-        game_room = room_create(dg_room.id, NULL, dg_room.width, dg_room.height);
+        game_room = room_create(dg_room.id, room_id_to_name(dg_room.id), dg_room.width, dg_room.height);
 
         // Assign first_room_out before the next iteration of the loop assigned a new mem address to game_room var.
         if (0 == *num_rooms_out) {
