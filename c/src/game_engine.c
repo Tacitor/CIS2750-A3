@@ -1,4 +1,4 @@
-#include "game_engine.h"
+#include "my_game_engine.h"
 #include <stdlib.h>
 #include "world_loader.h"
 #include "player.h"
@@ -271,6 +271,35 @@ Status game_engine_get_room_dimensions(const GameEngine *eng, int *width_out, in
 
     *width_out = current_room->width;
     *height_out = current_room->height;
+
+    return OK;
+}
+
+Status game_engine_get_room_name(const GameEngine *eng, char **name_out) {
+    if (NULL == eng) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (NULL == name_out) {
+        return NULL_POINTER;
+    }
+
+    if (NULL == eng->player) {
+        return INTERNAL_ERROR;
+    }
+
+    const Room *current_room = NULL;
+    Status stat = internal_get_room_from_id(eng, eng->player->room_id, &current_room);
+
+    if (GE_NO_SUCH_ROOM == stat || NULL == current_room) {
+        return GE_NO_SUCH_ROOM;
+    }
+
+    if (OK != stat) {
+        return INTERNAL_ERROR;
+    }
+
+    *name_out = current_room->name;
 
     return OK;
 }

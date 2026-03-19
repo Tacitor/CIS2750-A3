@@ -68,7 +68,4 @@ Status room_set_pushables(Room *r, Pushable *pushables, int pushable_count);
 
 Status convert_dg_err_to_wl(int dg_status);
 
-Status game_engine_parse_treasure(const Treasure * const *treasures, int treasure_index, int *id_out, char **name_out, int *starting_room_out,
-    int *initial_x_out, int *initial_y_out, int *x_out, int *y_out, bool *collected_out);
-
 #endif /* MY_ROOM_H */
