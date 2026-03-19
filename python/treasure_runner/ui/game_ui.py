@@ -47,55 +47,69 @@ class GameUI:
 
     def _ui_main_game(self, stdscr):
         user_input = ord('z')
+
         while user_input != ord('q') and user_input != ord('Q'):
             room_row = 3
-            room_col = 0
             room_width, room_height = self._eng.get_room_dimensions()
-            game_element_width_offset = room_width + 5
-            game_element_height_offset = room_height + room_row + 1
-            term_y, term_x = stdscr.getmaxyx()
-            term_y += 1 # Useless operation on this var to let the linter be happy
 
             stdscr.clear()
+
             safe_addstr_colour(stdscr, 0, 0, self._message_bar, curses.color_pair(self._message_bar_colour))
             # TODOFIXME: Add this.
             safe_addstr(stdscr, 1, 0, "<<room number and name here>>")
 
-            room_str = self._eng.render_current_room()
-            player_x, player_y = self._eng.player.get_position()
-            safe_addstr(stdscr, room_row, room_col, room_str)
-            # TODOFIXME: Make safe?
-            stdscr.addch(room_row + player_y, room_col + player_x, "@", curses.color_pair(2))
+            self._ui_render_room(stdscr, room_row)
+            self._ui_render_side_bar_and_status(stdscr, room_row, room_width, room_height)
 
-            side_bar_lowest = 10
-            safe_addstr(stdscr, 3, game_element_width_offset, "Game Elements:")
-            # TODOFIXME: Pull correct char set from the GE
-            safe_addstr(stdscr, 5, game_element_width_offset, "@ - Julia")
-            safe_addstr_colour(stdscr, 5, game_element_width_offset, "@", curses.color_pair(2))
-            safe_addstr(stdscr, 6, game_element_width_offset, "# - wall")
-            safe_addstr(stdscr, 7, game_element_width_offset, "$ - gold")
-            safe_addstr(stdscr, 8, game_element_width_offset, "X - portal")
-            safe_addstr(stdscr, 9, game_element_width_offset, ". - floor")
-            safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, "O - pushable obstacle")
-
-            if game_element_height_offset < side_bar_lowest + 2:
-                game_element_height_offset = side_bar_lowest + 2
-            # TODOFIXME: Add > portal traversal support.
-            # TODOFIXME: Add r to reset support.
-            safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
-            safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
-            # TODOFIXME: Implement this
-            safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: 0 gold collected, 1 room(s) played, 4 room(s) left")
-            # TODOFIXME: What kind of name needs to go here? From the .json? Are these lifetime stats of the profile, or just status or current game?
-            safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, "<NAME> Status:", curses.color_pair(4))
-            safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
-            email_pos = term_x - len(self.email)
-            if len(self.game_controls) < term_x:
-                email_pos = len(self.game_controls) - len(self.email)
-            safe_addstr(stdscr, game_element_height_offset + 3, email_pos, self.email)
             stdscr.refresh()
 
             user_input = self._get_user_input(stdscr)
+
+    def _ui_render_room(self, stdscr, room_row):
+        room_str = self._eng.render_current_room()
+        player_x, player_y = self._eng.player.get_position()
+        safe_addstr(stdscr, room_row, 0, room_str)
+        # TODOFIXME: Make safe?
+        stdscr.addch(room_row + player_y, 0 + player_x, "@", curses.color_pair(2))
+
+    def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
+        game_element_width_offset = room_width + 5
+        game_element_height_offset = room_height + room_row + 1
+
+        side_bar_lowest = 10
+
+        term_y, term_x = stdscr.getmaxyx()
+        term_y += 1 # Useless operation on this var to let the linter be happy
+
+        safe_addstr(stdscr, 3, game_element_width_offset, "Game Elements:")
+        # TODOFIXME: Pull correct char set from the GE
+        safe_addstr(stdscr, 5, game_element_width_offset, "@ - Julia")
+        safe_addstr_colour(stdscr, 5, game_element_width_offset, "@", curses.color_pair(2))
+        safe_addstr(stdscr, 6, game_element_width_offset, "# - wall")
+        safe_addstr(stdscr, 7, game_element_width_offset, "$ - gold")
+        safe_addstr(stdscr, 8, game_element_width_offset, "X - portal")
+        safe_addstr(stdscr, 9, game_element_width_offset, ". - floor")
+        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, "O - pushable obstacle")
+
+        if game_element_height_offset < side_bar_lowest + 2:
+            game_element_height_offset = side_bar_lowest + 2
+        # TODOFIXME: Add > portal traversal support.
+        # TODOFIXME: Add r to reset support.
+        safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
+        safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
+        # TODOFIXME: Implement this
+        safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: 0 gold collected, 1 room(s) played, 4 room(s) left")
+        # TODOFIXME: What kind of name needs to go here? From the .json? Are these lifetime stats of the profile, or just status or current game?
+        safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, "<NAME> Status:", curses.color_pair(4))
+        safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
+
+        self._ui_render_email(stdscr, term_x, game_element_height_offset)
+
+    def _ui_render_email(self, stdscr, term_x, game_element_height_offset):
+        email_pos = term_x - len(self.email)
+        if len(self.game_controls) < term_x:
+            email_pos = len(self.game_controls) - len(self.email)
+        safe_addstr(stdscr, game_element_height_offset + 3, email_pos, self.email)
 
     def _get_user_input(self, stdscr) -> int:
         user_input = stdscr.getch()
