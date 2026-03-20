@@ -109,3 +109,9 @@ class GameEngine:
 
         if stat != Status.OK:
             raise status_to_exception(stat, "ERROR: failed to reset the GameEngine. Status: " + str(stat))
+
+    def underfoot_portal(self) -> None:
+        stat = lib.game_engine_underfoot_portal(self._eng)
+
+        if stat != Status.OK:
+            raise status_to_exception(stat, "ERROR: failed to use an underfoot portal by the GameEngine. Status: " + str(stat))

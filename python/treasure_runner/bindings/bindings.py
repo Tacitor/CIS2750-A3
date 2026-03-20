@@ -176,6 +176,10 @@ lib.game_engine_reset.restype = c_int
 lib.game_engine_get_charset.argtypes = [GameEngine]
 lib.game_engine_get_charset.restype = POINTER(Charset)
 
+# Status game_engine_underfoot_portal(GameEngine *eng)
+lib.game_engine_underfoot_portal.argtypes = [GameEngine]
+lib.game_engine_underfoot_portal.restype = c_int
+
 # ============================================================
 # C Function Signatures - Player
 # ============================================================
