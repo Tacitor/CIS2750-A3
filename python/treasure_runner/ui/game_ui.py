@@ -1,8 +1,11 @@
 #GameUI should query the GameEngine for state and call rendering functions only.
 import curses
+import json
+from pathlib import Path
 from treasure_runner.models.game_engine import GameEngine
 from treasure_runner.bindings import Direction
 from treasure_runner.models.exceptions import GameEngineError, ImpassableError
+from .user_info import UserInfo
 
 class GameUI:
     def __init__(self, config_path: str, profile_path: str):
@@ -10,6 +13,7 @@ class GameUI:
         self._profile = profile_path
         self._eng = GameEngine(self._config)
         self._cach_player_collected_gold = self._eng.player.get_collected_count() # Local cache of player gold for UI display purpose. Used to update the message bar if a player collects a treasure
+        self._user_info_valid, self._user_info = load_player_info(self._profile)
 
         self.game_name = "Julia's Jubilant Journey"
         self.email = "lkrampit@uoguelph.ca"
@@ -19,6 +23,8 @@ class GameUI:
         self._message_bar_colour = 4
 
     def launch(self):
+        # TODOFIXME: Call the method right here that check _user_info_valid. Prompts user for first time setup if not valid.
+
         print("Launching the TUI...")
         try:
             curses.wrapper(self._run_tui)
@@ -74,6 +80,10 @@ class GameUI:
             user_input = self._get_user_input(stdscr)
             self._check_user_collect_gold()
 
+        # Once the user has quit (or win condition) update the save profile
+        # TODOFIXME: Make/Call method to update the values in _user_info if they need updating before writting to disk
+        save_player_info(self._profile, self._user_info)
+
     def _ui_render_room(self, stdscr, room_row):
         room_str = self._eng.render_current_room()
         player_x, player_y = self._eng.player.get_position()
@@ -98,9 +108,9 @@ class GameUI:
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
         # TODOFIXME: Implement this
-        safe_addstr(stdscr, game_element_height_offset + 2, 0, "<NAME> Status: " + str(self._eng.player.get_collected_count()) + " gold collected, 1 room(s) played, 4 room(s) left")
+        safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + " gold collected, 1 room(s) played, 4 room(s) left")
         # TODOFIXME: Put name from the .json here. Considered a room played once all the treasures in this room have been collected.
-        safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, "<NAME> Status:", curses.color_pair(4))
+        safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status:", curses.color_pair(4))
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
 
         self._ui_render_email(stdscr, term_x, game_element_height_offset)
@@ -189,6 +199,26 @@ class GameUI:
         # To improve UX don't count window resizing as a keypress, all other are fine
         while char == 410:
             char = stdscr.getch()
+
+def save_player_info(path: str, user_info: UserInfo):
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(user_info.to_dict(), file, indent=2)
+
+def load_player_info(path) -> tuple[bool, UserInfo]:
+    if not Path(path).exists():
+        # TODOFIXME: Add prompting the user for their player name. Just use simple Python CLI to read in player name before starting curses.
+        # print(f"No save file at '{path}' — starting fresh.")
+        return False, UserInfo()
+
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        return True, UserInfo.from_dict(data)
+
+    except json.JSONDecodeError:
+        # TODOFIXME: Add prompting the user for their player name. Just use simple Python CLI to read in player name before starting curses.
+        # print(f"Warning: '{path}' is not valid JSON — starting fresh.")
+        return False, UserInfo()
 
 def safe_addstr_colour(stdscr, row, col, string, colour_pair):
     try:
