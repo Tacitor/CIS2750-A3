@@ -23,7 +23,7 @@ class GameUI:
         self._message_bar_colour = 4
 
     def launch(self):
-        # TODOFIXME: Call the method right here that check _user_info_valid. Prompts user for first time setup if not valid.
+        self._validate_user_info()
 
         print("Launching the TUI...")
         try:
@@ -107,9 +107,8 @@ class GameUI:
         # TODOFIXME: Add > portal traversal support.
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
-        # TODOFIXME: Implement this
+        # TODOFIXME: Implement this. Considered a room played once all the treasures in this room have been collected.
         safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + " gold collected, 1 room(s) played, 4 room(s) left")
-        # TODOFIXME: Put name from the .json here. Considered a room played once all the treasures in this room have been collected.
         safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status:", curses.color_pair(4))
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
 
@@ -200,14 +199,20 @@ class GameUI:
         while char == 410:
             char = stdscr.getch()
 
+    def _validate_user_info(self):
+        if not self._user_info_valid:
+            print("[ERROR] The provided profile file-path either does not exist or was not vaid JSON format. It will be overwritten.")
+            print("Please enter a new name:")
+            new_name = input()
+            self._user_info.name = new_name
+            self._user_info_valid = True
+
 def save_player_info(path: str, user_info: UserInfo):
     with open(path, "w", encoding="utf-8") as file:
         json.dump(user_info.to_dict(), file, indent=2)
 
 def load_player_info(path) -> tuple[bool, UserInfo]:
     if not Path(path).exists():
-        # TODOFIXME: Add prompting the user for their player name. Just use simple Python CLI to read in player name before starting curses.
-        # print(f"No save file at '{path}' — starting fresh.")
         return False, UserInfo()
 
     try:
@@ -216,8 +221,6 @@ def load_player_info(path) -> tuple[bool, UserInfo]:
         return True, UserInfo.from_dict(data)
 
     except json.JSONDecodeError:
-        # TODOFIXME: Add prompting the user for their player name. Just use simple Python CLI to read in player name before starting curses.
-        # print(f"Warning: '{path}' is not valid JSON — starting fresh.")
         return False, UserInfo()
 
 def safe_addstr_colour(stdscr, row, col, string, colour_pair):

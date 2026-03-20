@@ -6,7 +6,7 @@ class UserInfo:
         self.games_played = 0
         self.max_treasure_collected = 0
         self.most_rooms_world_completed = 0
-        self.timestamp_last_played = ""
+        self.timestamp_last_played = "Never"
 
     def to_dict(self):
         """Return a JSON-safe snapshot. The timestamp will auto update base on when this object is serialized"""
