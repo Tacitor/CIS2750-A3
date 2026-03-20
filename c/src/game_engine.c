@@ -125,18 +125,9 @@ static bool internal_is_edge_position(int x_pos, int y_pos, const Room *room) {
     }
 
     return false;
-} 
+}
 
-Status internal_portal_move(GameEngine *eng, int portal_taget_room_id, int x_query, int y_query, const Room *current_room) {
-    // Support for "> – to go through a[n interior] portal"
-    // A player can walk all over an interior portal and MUST press '>' to use an interior portal
-    if (!internal_is_edge_position(x_query, y_query, current_room)) {
-        eng->player->x = x_query;
-        eng->player->y = y_query;
-        return OK;
-    }
-
-    // The rest of this function is all for edge portals which do not support "> – to go through a[n interior] portal"
+Status internal_teleport_player(GameEngine *eng, int portal_taget_room_id) {
     const Room *portal_targ_room = NULL;
     Status stat = internal_get_room_from_id(eng, portal_taget_room_id, &portal_targ_room);
 
@@ -162,6 +153,19 @@ Status internal_portal_move(GameEngine *eng, int portal_taget_room_id, int x_que
     eng->player->y = portal_targ_room_y;
 
     return OK;
+}
+
+Status internal_portal_move(GameEngine *eng, int portal_taget_room_id, int x_query, int y_query, const Room *current_room) {
+    // Support for "> – to go through a[n interior] portal"
+    // A player can walk all over an interior portal and MUST press '>' to use an interior portal
+    if (!internal_is_edge_position(x_query, y_query, current_room)) {
+        eng->player->x = x_query;
+        eng->player->y = y_query;
+        return OK;
+    }
+
+    // The rest of this function is all for edge portals which do not support "> – to go through a[n interior] portal"
+    return internal_teleport_player(eng, portal_taget_room_id);
 }
 
 static Status internal_parse_classified_tile(GameEngine *eng, int x_query, int y_query, const Room *current_room, Direction dir) {
@@ -254,6 +258,32 @@ Status game_engine_move_player(GameEngine *eng, Direction dir) {
     }
 
     return OK;
+}
+
+Status game_engine_underfoot_portal(GameEngine *eng) {
+    if (NULL == eng || NULL == eng->player) {
+        return INVALID_ARGUMENT;
+    }
+
+    const Room *current_room = NULL;
+    Status stat = internal_get_room_from_id(eng, eng->player->room_id, &current_room);
+
+    if (GE_NO_SUCH_ROOM == stat || NULL == current_room) {
+        return GE_NO_SUCH_ROOM;
+    }
+
+    if (OK != stat) {
+        return INTERNAL_ERROR;
+    }
+
+    int query_tile_id = -1;
+    RoomTileType pos_query_type = room_classify_tile(current_room, eng->player->x, eng->player->y, &query_tile_id);
+
+    if (ROOM_TILE_PORTAL != pos_query_type) {
+        return ROOM_NO_PORTAL;
+    }
+
+    return internal_teleport_player(eng, query_tile_id);;
 }
 
 Status game_engine_get_room_count(const GameEngine *eng, int *count_out) {

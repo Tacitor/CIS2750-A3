@@ -10,4 +10,15 @@ Status game_engine_get_room_name(const GameEngine *eng, char **name_out);
 
 const Charset *game_engine_get_charset(const GameEngine *eng);
 
+/**
+ * Teleport the player if they are standing on top of a portal.
+ * This can only happen in portal_placement=interior is set in the config .ini file.
+ * 
+ * Returns:
+ *  - OK on success
+ *  - ROOM_NO_PORTAL if the player is not standing on a portal
+ *  - INVALID_ARGUMENT, GE_NO_SUCH_ROOM, INTERNAL_ERROR, etc. as needed
+ */
+Status game_engine_underfoot_portal(GameEngine *eng);
+
 #endif /* MY_GAME_ENGINE_H */
