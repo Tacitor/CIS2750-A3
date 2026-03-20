@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 class UserInfo:
     def __init__(self):
         self.name = ""
@@ -9,13 +7,13 @@ class UserInfo:
         self.timestamp_last_played = "Never"
 
     def to_dict(self):
-        """Return a JSON-safe snapshot. The timestamp will auto update base on when this object is serialized"""
+        """Return a JSON-safe snapshot."""
         return {
             "player_name":                  self.name,
             "games_played":                 self.games_played,
             "max_treasure_collected":       self.max_treasure_collected,
             "most_rooms_world_completed":   self.most_rooms_world_completed,
-            "timestamp_last_played":        datetime.now(timezone.utc).isoformat(),
+            "timestamp_last_played":        self.timestamp_last_played,
         }
 
     @classmethod

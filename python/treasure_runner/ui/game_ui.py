@@ -2,6 +2,7 @@
 import curses
 import json
 from pathlib import Path
+from datetime import datetime, timezone
 from treasure_runner.models.game_engine import GameEngine
 from treasure_runner.bindings import Direction
 from treasure_runner.models.exceptions import GameEngineError, ImpassableError
@@ -81,7 +82,7 @@ class GameUI:
             self._check_user_collect_gold()
 
         # Once the user has quit (or win condition) update the save profile
-        # TODOFIXME: Make/Call method to update the values in _user_info if they need updating before writting to disk
+        self._update_player_info()
         save_player_info(self._profile, self._user_info)
 
     def _ui_render_room(self, stdscr, room_row):
@@ -186,11 +187,11 @@ class GameUI:
         safe_addstr_colour(stdscr, 1, 0, "Thanks for playing", curses.color_pair(2))
 
     def _splash_player_info(self, stdscr):
-        safe_addstr(stdscr, 4, 0, "Player name:")
-        safe_addstr(stdscr, 5, 0, "Games played:")
-        safe_addstr(stdscr, 6, 0, "Treasure high score:")
-        safe_addstr(stdscr, 7, 0, "Biggest world completed:")
-        safe_addstr(stdscr, 8, 0, "Last played:")
+        safe_addstr(stdscr, 4, 0, "Player name: " + self._user_info.name)
+        safe_addstr(stdscr, 5, 0, "Games played: " + str(self._user_info.games_played))
+        safe_addstr(stdscr, 6, 0, "Treasure high score: " + str(self._user_info.max_treasure_collected))
+        safe_addstr(stdscr, 7, 0, "Biggest world completed: " + str(self._user_info.most_rooms_world_completed))
+        safe_addstr(stdscr, 8, 0, "Last played: " + self._user_info.timestamp_last_played)
         safe_addstr_colour(stdscr, 10, 5, "Press any key to continue...", curses.color_pair(3))
         stdscr.refresh() # Screen is redrawn — not printed
 
@@ -206,6 +207,15 @@ class GameUI:
             new_name = input()
             self._user_info.name = new_name
             self._user_info_valid = True
+
+    def _update_player_info(self):
+        if self._user_info.max_treasure_collected < self._eng.player.get_collected_count():
+            self._user_info.max_treasure_collected = self._eng.player.get_collected_count()
+
+        # TODOFIXME: Add a check here to see if room(s) left == 0 AND if most_rooms_world_completed is less than room(s) played
+
+        self._user_info.games_played += 1
+        self._user_info.timestamp_last_played = datetime.now(timezone.utc).isoformat()
 
 def save_player_info(path: str, user_info: UserInfo):
     with open(path, "w", encoding="utf-8") as file:
