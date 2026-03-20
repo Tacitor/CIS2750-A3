@@ -18,7 +18,7 @@ class GameUI:
 
         self.game_name = "Julia's Jubilant Journey"
         self.email = "lkrampit@uoguelph.ca"
-        self.game_controls = "Game Controls: Arrow-keys/WASD to move, > to use a portal, q to quit, and r to reset whole game."
+        self.game_controls = "Game Controls: Arrow-keys/WASD to move, > to use an underfoot portal, q to quit, and r to reset whole game."
 
         self._message_bar = "Start by moving around"
         self._message_bar_colour = 4
@@ -90,7 +90,6 @@ class GameUI:
         player_x, player_y = self._eng.player.get_position()
         charset = self._eng.get_charset()
         safe_addstr(stdscr, room_row, 0, room_str)
-        # TODOFIXME: Make safe?
         stdscr.addch(room_row + player_y, 0 + player_x, charset.contents.player.decode("utf-8"), curses.color_pair(2))
 
     def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
@@ -109,7 +108,7 @@ class GameUI:
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
         # TODOFIXME: Implement this. Considered a room played once all the treasures in this room have been collected.
-        safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + " gold collected, 1 room(s) played, 4 room(s) left")
+        safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + " gold collected, # room(s) played, # room(s) left")
         safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status:", curses.color_pair(4))
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
 
@@ -138,6 +137,7 @@ class GameUI:
 
     def _get_user_input(self, stdscr) -> int:
         user_input = stdscr.getch()
+        # TODOFIXME: Default message should show progress toward completion (e.g., "15/20 treasures collected")
         self._message_bar = ""
         self._message_bar_colour = 0
 

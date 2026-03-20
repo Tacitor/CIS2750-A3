@@ -1,7 +1,7 @@
 {
   "player_name": "TestUsername",
-  "games_played": 0,
-  "max_treasure_collected": 0,
+  "games_played": 20,
+  "max_treasure_collected": 6,
   "most_rooms_world_completed": 0,
-  "timestamp_last_played": "2026-03-20T18:10:00.422581+00:00"
+  "timestamp_last_played": "2026-03-20T21:56:32.782513+00:00"
 }
