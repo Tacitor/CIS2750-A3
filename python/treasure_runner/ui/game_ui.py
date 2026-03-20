@@ -9,6 +9,7 @@ class GameUI:
         self._config = config_path
         self._profile = profile_path
         self._eng = GameEngine(self._config)
+        self._cach_player_collected_gold = self._eng.player.get_collected_count() # Local cache of player gold for UI display purpose. Used to update the message bar if a player collects a treasure
 
         self.game_name = "Julia's Jubilant Journey"
         self.email = "lkrampit@uoguelph.ca"
@@ -47,9 +48,9 @@ class GameUI:
 
     def _ui_main_game(self, stdscr):
         user_input = ord('z')
+        room_row = 3
 
         while user_input != ord('q') and user_input != ord('Q'):
-            room_row = 3
             room_width, room_height = self._eng.get_room_dimensions()
 
             stdscr.clear()
@@ -63,6 +64,7 @@ class GameUI:
             stdscr.refresh()
 
             user_input = self._get_user_input(stdscr)
+            self._check_user_collect_gold()
 
     def _ui_render_room(self, stdscr, room_row):
         room_str = self._eng.render_current_room()
@@ -85,7 +87,6 @@ class GameUI:
         if game_element_height_offset < side_bar_lowest + 2:
             game_element_height_offset = side_bar_lowest + 2
         # TODOFIXME: Add > portal traversal support.
-        # TODOFIXME: Add r to reset support.
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
         # TODOFIXME: Implement this
@@ -139,7 +140,6 @@ class GameUI:
                 # TODOFIXME: Add this. There should be a message for successful teleportation and another for if the player is not on/near a portal
                 self._message_bar = "This form of portal travel has not been added yet"
 
-            # TODOFIXME: Add message bar text for treasure collection
         except ImpassableError:
             self._message_bar = "You can't go that way!"
             self._message_bar_colour = 2
@@ -148,6 +148,14 @@ class GameUI:
             self._message_bar_colour = 1
 
         return user_input
+
+    def _check_user_collect_gold(self):
+        before = self._cach_player_collected_gold
+        self._cach_player_collected_gold = self._eng.player.get_collected_count()
+
+        if self._message_bar == "" and before != self._cach_player_collected_gold:
+            self._message_bar = "You picked up gold"
+            self._message_bar_colour = 0
 
     def _splash_startup(self, stdscr):
         stdscr.clear()
