@@ -113,13 +113,30 @@ Status internal_bump_query_in_dir(int *x_query, int *y_query, Direction dir) {
         // Width 0 is most west position
         (*x_query)--;
     } else {
-        return INVALID_ARGUMENT; //HERE
+        return INVALID_ARGUMENT;
     }
 
     return OK;
 }
 
-Status internal_portal_move(GameEngine *eng, int portal_taget_room_id) {
+static bool internal_is_edge_position(int x_pos, int y_pos, const Room *room) {
+    if (x_pos == 0 || y_pos == 0 || x_pos == room->width-1 || y_pos == room->height-1) {
+        return true;
+    }
+
+    return false;
+} 
+
+Status internal_portal_move(GameEngine *eng, int portal_taget_room_id, int x_query, int y_query, const Room *current_room) {
+    // Support for "> – to go through a[n interior] portal"
+    // A player can walk all over an interior portal and MUST press '>' to use an interior portal
+    if (!internal_is_edge_position(x_query, y_query, current_room)) {
+        eng->player->x = x_query;
+        eng->player->y = y_query;
+        return OK;
+    }
+
+    // The rest of this function is all for edge portals which do not support "> – to go through a[n interior] portal"
     const Room *portal_targ_room = NULL;
     Status stat = internal_get_room_from_id(eng, portal_taget_room_id, &portal_targ_room);
 
@@ -147,7 +164,10 @@ Status internal_portal_move(GameEngine *eng, int portal_taget_room_id) {
     return OK;
 }
 
-static Status internal_parse_classified_tile(GameEngine *eng, RoomTileType pos_query_type, int query_tile_id, int x_query, int y_query, const Room *current_room, Direction dir) {
+static Status internal_parse_classified_tile(GameEngine *eng, int x_query, int y_query, const Room *current_room, Direction dir) {
+    int query_tile_id = -1;
+    RoomTileType pos_query_type = room_classify_tile(current_room, x_query, y_query, &query_tile_id);
+    
     if (ROOM_TILE_INVALID == pos_query_type || ROOM_TILE_WALL == pos_query_type) {
         // The caller has tried to move the player out of bounds (ROOM_TILE_INVALID), this the Direction dir is not valid
         // OR tried to move the player into a wall.
@@ -191,7 +211,7 @@ static Status internal_parse_classified_tile(GameEngine *eng, RoomTileType pos_q
             return INTERNAL_ERROR;
         }
     } else if (ROOM_TILE_PORTAL == pos_query_type) {
-        int stat = internal_portal_move(eng, query_tile_id);
+        int stat = internal_portal_move(eng, query_tile_id, x_query, y_query, current_room);
 
         if (OK != stat) {
             return stat;
@@ -225,12 +245,9 @@ Status game_engine_move_player(GameEngine *eng, Direction dir) {
 
     if (OK != stat) {
         return INVALID_ARGUMENT;
-    }    
+    }
 
-    int query_tile_id = -1;
-    RoomTileType pos_query_type = room_classify_tile(current_room, x_query, y_query, &query_tile_id);
-
-    stat = internal_parse_classified_tile(eng, pos_query_type, query_tile_id, x_query, y_query, current_room, dir);
+    stat = internal_parse_classified_tile(eng, x_query, y_query, current_room, dir);
 
     if (OK != stat) {
         return stat;
