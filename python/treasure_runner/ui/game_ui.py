@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from treasure_runner.models.game_engine import GameEngine
 from treasure_runner.bindings import Direction
-from treasure_runner.models.exceptions import GameEngineError, ImpassableError
+from treasure_runner.models.exceptions import GameEngineError, ImpassableError, NoPortalError
 from .user_info import UserInfo
 
 class GameUI:
@@ -20,7 +20,7 @@ class GameUI:
         self.email = "lkrampit@uoguelph.ca"
         self.game_controls = "Game Controls: Arrow-keys/WASD to move, > to use an underfoot portal, q to quit, and r to reset whole game."
 
-        self._message_bar = "Start by moving around"
+        self._message_bar = "Start by moving around."
         self._message_bar_colour = 4
 
     def launch(self):
@@ -104,7 +104,7 @@ class GameUI:
 
         if game_element_height_offset < side_bar_lowest + 2:
             game_element_height_offset = side_bar_lowest + 2
-        # TODOFIXME: Add > portal traversal support.
+
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
         # TODOFIXME: Implement this. Considered a room played once all the treasures in this room have been collected.
@@ -142,37 +142,44 @@ class GameUI:
         self._message_bar_colour = 0
 
         try:
-            if user_input == ord('w') or user_input == 259 or user_input == ord('W'):
-                self._eng.move_player(Direction.NORTH)
-            elif user_input == ord('a') or user_input == 260 or user_input == ord('A'):
-                self._eng.move_player(Direction.WEST)
-            elif user_input == ord('s') or user_input == 258 or user_input == ord('S'):
-                self._eng.move_player(Direction.SOUTH)
-            elif user_input == ord('d') or user_input == 261 or user_input == ord('D'):
-                self._eng.move_player(Direction.EAST)
-            elif user_input == ord('r') or user_input == ord('R'):
-                self._message_bar = "The game as been reset"
-                self._message_bar_colour = 4
-                self._eng.reset()
-            elif user_input == ord('>'):
-                # TODOFIXME: Add this. There should be a message for successful teleportation and another for if the player is not on/near a portal
-                self._message_bar = "This form of portal travel has not been added yet"
+            self._parse_input(user_input)
 
         except ImpassableError:
             self._message_bar = "You can't go that way!"
             self._message_bar_colour = 2
+        except NoPortalError:
+            portal_char = self._eng.get_charset().contents.portal.decode("utf-8")
+            self._message_bar = f"You need to be standing on a portal ({portal_char}) to teleport."
+            self._message_bar_colour = 4
         except GameEngineError:
-            self._message_bar = "The GameEngine had a GameEngineError"
+            self._message_bar = "The GameEngine had a GameEngineError!"
             self._message_bar_colour = 1
 
         return user_input
+
+    def _parse_input(self, user_input):
+        if user_input == ord('w') or user_input == 259 or user_input == ord('W'):
+            self._eng.move_player(Direction.NORTH)
+        elif user_input == ord('a') or user_input == 260 or user_input == ord('A'):
+            self._eng.move_player(Direction.WEST)
+        elif user_input == ord('s') or user_input == 258 or user_input == ord('S'):
+            self._eng.move_player(Direction.SOUTH)
+        elif user_input == ord('d') or user_input == 261 or user_input == ord('D'):
+            self._eng.move_player(Direction.EAST)
+        elif user_input == ord('r') or user_input == ord('R'):
+            self._message_bar = "The game as been reset."
+            self._message_bar_colour = 4
+            self._eng.reset()
+        elif user_input == ord('>'):
+            # TODOFIXME: Add this. There should be a message for successful teleportation and another for if the player is not on/near a portal
+            self._eng.underfoot_portal()
 
     def _check_user_collect_gold(self):
         before = self._cach_player_collected_gold
         self._cach_player_collected_gold = self._eng.player.get_collected_count()
 
         if self._message_bar == "" and before != self._cach_player_collected_gold:
-            self._message_bar = "You picked up gold"
+            self._message_bar = "You picked up gold."
             self._message_bar_colour = 0
 
     def _splash_startup(self, stdscr):
