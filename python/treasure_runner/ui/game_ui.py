@@ -13,14 +13,16 @@ class GameUI:
         self._config = config_path
         self._profile = profile_path
         self._eng = GameEngine(self._config)
-        self._cach_player_collected_gold = self._eng.player.get_collected_count() # Local cache of player gold for UI display purpose. Used to update the message bar if a player collects a treasure
         self._user_info_valid, self._user_info = load_player_info(self._profile)
+        self._cache_player_collected_gold = self._eng.player.get_collected_count() # Local cache of player gold for UI display purpose. Used to update the message bar if a player collects a treasure
+        self._cache_player_room_id = self._eng.player.get_room() # Another local cache just for UI detection and status message prompting 
 
         self.game_name = "Julia's Jubilant Journey"
         self.email = "lkrampit@uoguelph.ca"
         self.game_controls = "Game Controls: Arrow-keys/WASD to move, > to use an underfoot portal, q to quit, and r to reset whole game."
 
-        self._message_bar = "Start by moving around."
+        gold_char = self._eng.get_charset().contents.treasure.decode("utf-8")
+        self._message_bar = f"Collect all the gold ({gold_char}). Start by moving around."
         self._message_bar_colour = 4
 
     def launch(self):
@@ -65,6 +67,7 @@ class GameUI:
         user_input = ord('z')
         room_row = 3
 
+        # TODOFIXME: Add check for win condition.
         while user_input != ord('q') and user_input != ord('Q'):
             room_width, room_height = self._eng.get_room_dimensions()
 
@@ -79,7 +82,8 @@ class GameUI:
             stdscr.refresh()
 
             user_input = self._get_user_input(stdscr)
-            self._check_user_collect_gold()
+            self._check_player_room()
+            self._check_player_collected_gold()
 
         # Once the user has quit (or win condition) update the save profile
         self._update_player_info()
@@ -171,14 +175,21 @@ class GameUI:
             self._message_bar_colour = 4
             self._eng.reset()
         elif user_input == ord('>'):
-            # TODOFIXME: Add this. There should be a message for successful teleportation and another for if the player is not on/near a portal
             self._eng.underfoot_portal()
+    
+    def _check_player_room(self):
+        before = self._cache_player_room_id
+        self._cache_player_room_id = self._eng.player.get_room()
 
-    def _check_user_collect_gold(self):
-        before = self._cach_player_collected_gold
-        self._cach_player_collected_gold = self._eng.player.get_collected_count()
+        if self._message_bar == "" and before != self._cache_player_room_id:
+            self._message_bar = "You teleported to another room."
+            self._message_bar_colour = 0
+    
+    def _check_player_collected_gold(self):
+        before = self._cache_player_collected_gold
+        self._cache_player_collected_gold = self._eng.player.get_collected_count()
 
-        if self._message_bar == "" and before != self._cach_player_collected_gold:
+        if self._message_bar == "" and before != self._cache_player_collected_gold:
             self._message_bar = "You picked up gold."
             self._message_bar_colour = 0
 
