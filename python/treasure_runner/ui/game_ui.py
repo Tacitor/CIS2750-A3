@@ -66,18 +66,17 @@ class GameUI:
 
         self._ui_main_game(stdscr)
 
-        # TODOFIXME: Once the final treasure is collected, the game displays a victory
-        # message that includes the player profile and possibly other things like
-        # total steps taken, rooms visited, or time elapsed.
-        self._splash_end(stdscr)
+        if self._eng.player.get_collected_count() < self._cache_world_gold_total_count:
+            self._splash_quit(stdscr)
+        else:
+            self._splash_win(stdscr)
         self._splash_player_info(stdscr)
 
     def _ui_main_game(self, stdscr):
         user_input = ord('z')
         room_row = 3
 
-        # TODOFIXME: Add check for win condition. When player.collected_count() == cached_gold_total_count trigger win condition.
-        while user_input != ord('q') and user_input != ord('Q'):
+        while user_input != ord('q') and user_input != ord('Q') and self._eng.player.get_collected_count() < self._cache_world_gold_total_count:
             room_width, room_height = self._eng.get_room_dimensions()
 
             stdscr.clear()
@@ -216,10 +215,24 @@ class GameUI:
         safe_addstr_colour(stdscr, 1, 0, "is a Sokoban-style puzzle game.", curses.color_pair(2))
         safe_addstr_colour(stdscr, 2, 0, "Take control of Julia as she explores a world of mazes on her search for treasures.", curses.color_pair(2))
 
-    def _splash_end(self , stdscr):
+    def _splash_quit(self , stdscr):
         stdscr.clear()
         safe_addstr_colour(stdscr, 0, 0, "Game over", curses.color_pair(1))
         safe_addstr_colour(stdscr, 1, 0, "Thanks for playing", curses.color_pair(2))
+        time1 = datetime.fromisoformat(self._user_info.timestamp_last_played)
+        time2 = datetime.fromisoformat(self._user_info.timestamp_started_game)
+        time_diff = time1 - time2
+        safe_addstr(stdscr, 2, 0, "Time elapsed: " + str(time_diff))
+
+    def _splash_win(self , stdscr):
+        stdscr.clear()
+        safe_addstr_colour(stdscr, 0, 0, "You Win!", curses.color_pair(1))
+        safe_addstr_colour(stdscr, 1, 0, "Thanks for playing. Congratulations on your victory.", curses.color_pair(2))
+        time1 = datetime.fromisoformat(self._user_info.timestamp_last_played)
+        time2 = datetime.fromisoformat(self._user_info.timestamp_started_game)
+        time_diff = time1 - time2
+        safe_addstr(stdscr, 2, 0, "Time elapsed: " + str(time_diff))
+        safe_addstr(stdscr, 3, 0, "Rooms visited: " + str(self.rooms_played))
 
     def _splash_player_info(self, stdscr):
         safe_addstr(stdscr, 4, 0, "Player name: " + self._user_info.name)
@@ -243,11 +256,14 @@ class GameUI:
             self._user_info.name = new_name
             self._user_info_valid = True
 
+        self._user_info.timestamp_started_game = datetime.now(timezone.utc).isoformat()
+
     def _update_player_info(self):
         if self._user_info.max_treasure_collected < self._eng.player.get_collected_count():
             self._user_info.max_treasure_collected = self._eng.player.get_collected_count()
 
-        # TODOFIXME: Add a check here to see if room(s) left == 0 AND if most_rooms_world_completed is less than room(s) played
+        if self.rooms_left == 0 and self._user_info.most_rooms_world_completed < self.rooms_played:
+            self._user_info.most_rooms_world_completed = self.rooms_played
 
         self._user_info.games_played += 1
         self._user_info.timestamp_last_played = datetime.now(timezone.utc).isoformat()

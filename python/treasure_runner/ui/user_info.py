@@ -5,6 +5,7 @@ class UserInfo:
         self.max_treasure_collected = 0
         self.most_rooms_world_completed = 0
         self.timestamp_last_played = "Never"
+        self.timestamp_started_game = "Never"
 
     def to_dict(self):
         """Return a JSON-safe snapshot."""
