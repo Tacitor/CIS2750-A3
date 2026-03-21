@@ -165,6 +165,24 @@ START_TEST(test_world_loader_pushables)
 END_TEST
 
 /* ============================================================
+ * Test 6: Call loader_load_world on config with switches
+ * Tests that loader_load_world successfully deals with switches
+ * ============================================================ */
+START_TEST(test_world_loader_switches)
+{
+    Graph *gr = NULL;
+    Room *r_first = NULL;
+    int room_num = 0;
+    Charset set = {0};
+
+    ck_assert_int_eq(loader_load_world("../assets/switches.ini", &gr, &r_first, &room_num, &set), OK);
+
+    // Free all graph and room memory
+    graph_destroy(gr);
+}
+END_TEST
+
+/* ============================================================
  * Suite Creation Function
  * 
  * This function builds and returns a test suite for the Check framework.
@@ -189,6 +207,7 @@ Suite *world_loader_suite(void)
 
     tcase_add_test(tc_load, test_convert_dg_err_to_wl);
     tcase_add_test(tc_load, test_world_loader_pushables);
+    tcase_add_test(tc_load, test_world_loader_switches);
 
     // Add the test case to the suite
     suite_add_tcase(s, tc_load);
