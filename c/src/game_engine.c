@@ -554,3 +554,64 @@ Status game_engine_parse_treasure(const Treasure * const *treasures, int treasur
 
     return OK;
 }
+
+Status game_engine_get_world_treasure_count(const GameEngine *eng, int *count_out) {
+    if (eng == NULL) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (count_out == NULL) {
+        return NULL_POINTER;
+    }
+
+    const void *const *rooms = NULL;
+    int rm_count = 0;
+
+    GraphStatus temp_stat = graph_get_all_payloads(eng->graph, &rooms, &rm_count);
+
+    if (temp_stat != GRAPH_STATUS_OK || rm_count != eng->room_count) {
+        return INTERNAL_ERROR;
+    }
+
+    *count_out = 0;
+    const Room *temp_room = NULL;
+
+    for (int i = 0; i < eng->room_count; i++) {
+        temp_room = rooms[i];
+        (*count_out) += temp_room->treasure_count;
+    }
+
+    return OK;
+}
+
+Status game_engine_complete_room_count(const GameEngine *eng, int *count_out) {
+    if (eng == NULL) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (count_out == NULL) {
+        return NULL_POINTER;
+    }
+
+    const void *const *rooms = NULL;
+    int rm_count = 0;
+
+    GraphStatus temp_stat = graph_get_all_payloads(eng->graph, &rooms, &rm_count);
+
+    if (temp_stat != GRAPH_STATUS_OK || rm_count != eng->room_count) {
+        return INTERNAL_ERROR;
+    }
+
+    *count_out = 0;
+    const Room *temp_room = NULL;
+
+    for (int i = 0; i < eng->room_count; i++) {
+        temp_room = rooms[i];
+
+        if (room_are_all_treasures_collected(temp_room)) {
+            (*count_out)++;
+        }
+    }
+
+    return OK;
+}

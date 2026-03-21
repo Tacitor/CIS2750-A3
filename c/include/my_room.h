@@ -68,4 +68,14 @@ Status room_set_pushables(Room *r, Pushable *pushables, int pushable_count);
 
 Status convert_dg_err_to_wl(int dg_status);
 
+/**
+ * Have all the treasures in the room been collected.
+ * 
+ * Returns:
+ *  true if each treasure has collected set to true.
+ *  false if even a single treasure has collected set to false.
+ *  false if r is NULL
+ */
+bool room_are_all_treasures_collected(const Room *r);
+
 #endif /* MY_ROOM_H */

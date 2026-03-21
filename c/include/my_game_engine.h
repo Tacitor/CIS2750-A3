@@ -21,4 +21,27 @@ const Charset *game_engine_get_charset(const GameEngine *eng);
  */
 Status game_engine_underfoot_portal(GameEngine *eng);
 
+/**
+ * Get the total number of treasures in all the rooms.
+ * 
+ * Returns:
+ *  OK on success
+ *  INVALID_ARGUMENT if eng is NULL
+ *  NULL_POINTER if count_out is NULL
+ *  INTERNAL_ERROR if there was an issue accessing the rooms interal to the GameEngine
+ */
+Status game_engine_get_world_treasure_count(const GameEngine *eng, int *count_out);
+
+/**
+ * Get the number of rooms that are completed. A complete room is one in which the player
+ * has collected all the treasures.
+ * 
+ * Returns:
+ *  OK on success
+ *  INVALID_ARGUMENT if eng is NULL
+ *  NULL_POINTER if count_out is NULL
+ *  INTERNAL_ERROR if there was an issue accessing the rooms interal to the GameEngine
+ */
+Status game_engine_complete_room_count(const GameEngine *eng, int *count_out);
+
 #endif /* MY_GAME_ENGINE_H */

@@ -535,3 +535,20 @@ Status room_try_push(Room *r, int pushable_idx, Direction dir) {
 
     return custom_room_try_push_const(temp_room, pushable_idx, dir);
 }
+
+bool room_are_all_treasures_collected(const Room *r) {
+    if (r == NULL) {
+        return false;
+    }
+
+    bool result = true;
+
+    // This list is not sorted and not big it does not make sense to sort
+    for (int i = 0; i < r->treasure_count; i++) {
+        if (! r->treasures[i].collected) {
+            result = false;
+        }
+    }
+
+    return result;
+}
