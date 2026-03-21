@@ -14,8 +14,14 @@ class GameUI:
         self._profile = profile_path
         self._eng = GameEngine(self._config)
         self._user_info_valid, self._user_info = load_player_info(self._profile)
+
         self._cache_player_collected_gold = self._eng.player.get_collected_count() # Local cache of player gold for UI display purpose. Used to update the message bar if a player collects a treasure
-        self._cache_player_room_id = self._eng.player.get_room() # Another local cache just for UI detection and status message prompting 
+        self._cache_player_room_id = self._eng.player.get_room() # Another local cache just for UI detection and status message prompting
+        self._cache_world_gold_total_count = self._eng.get_world_treasure_count()
+
+        self.rooms_played = 0
+        self.rooms_left = 0
+        self._update_treasure_stats()
 
         self.game_name = "Julia's Jubilant Journey"
         self.email = "lkrampit@uoguelph.ca"
@@ -60,6 +66,9 @@ class GameUI:
 
         self._ui_main_game(stdscr)
 
+        # TODOFIXME: Once the final treasure is collected, the game displays a victory
+        # message that includes the player profile and possibly other things like
+        # total steps taken, rooms visited, or time elapsed.
         self._splash_end(stdscr)
         self._splash_player_info(stdscr)
 
@@ -67,7 +76,7 @@ class GameUI:
         user_input = ord('z')
         room_row = 3
 
-        # TODOFIXME: Add check for win condition.
+        # TODOFIXME: Add check for win condition. When player.collected_count() == cached_gold_total_count trigger win condition.
         while user_input != ord('q') and user_input != ord('Q'):
             room_width, room_height = self._eng.get_room_dimensions()
 
@@ -82,8 +91,10 @@ class GameUI:
             stdscr.refresh()
 
             user_input = self._get_user_input(stdscr)
+            self._update_treasure_stats()
             self._check_player_room()
             self._check_player_collected_gold()
+            self._check_player_gold_progress()
 
         # Once the user has quit (or win condition) update the save profile
         self._update_player_info()
@@ -111,8 +122,7 @@ class GameUI:
 
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
         safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
-        # TODOFIXME: Implement this. Considered a room played once all the treasures in this room have been collected.
-        safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + " gold collected, # room(s) played, # room(s) left")
+        safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + f" gold collected, {self.rooms_played} room(s) played, {self.rooms_left} room(s) left")
         safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status:", curses.color_pair(4))
         safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
 
@@ -141,7 +151,6 @@ class GameUI:
 
     def _get_user_input(self, stdscr) -> int:
         user_input = stdscr.getch()
-        # TODOFIXME: Default message should show progress toward completion (e.g., "15/20 treasures collected")
         self._message_bar = ""
         self._message_bar_colour = 0
 
@@ -176,7 +185,7 @@ class GameUI:
             self._eng.reset()
         elif user_input == ord('>'):
             self._eng.underfoot_portal()
-    
+
     def _check_player_room(self):
         before = self._cache_player_room_id
         self._cache_player_room_id = self._eng.player.get_room()
@@ -184,7 +193,7 @@ class GameUI:
         if self._message_bar == "" and before != self._cache_player_room_id:
             self._message_bar = "You teleported to another room."
             self._message_bar_colour = 0
-    
+
     def _check_player_collected_gold(self):
         before = self._cache_player_collected_gold
         self._cache_player_collected_gold = self._eng.player.get_collected_count()
@@ -192,6 +201,14 @@ class GameUI:
         if self._message_bar == "" and before != self._cache_player_collected_gold:
             self._message_bar = "You picked up gold."
             self._message_bar_colour = 0
+
+    def _check_player_gold_progress(self):
+        if self._message_bar == "":
+            self._message_bar = f"{self._eng.player.get_collected_count()}/{self._cache_world_gold_total_count} gold collected."
+
+    def _update_treasure_stats(self):
+        self.rooms_played = self._eng.get_complete_room_count()
+        self.rooms_left = self._eng.get_room_count() - self.rooms_played
 
     def _splash_startup(self, stdscr):
         stdscr.clear()
