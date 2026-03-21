@@ -72,6 +72,7 @@ static void deep_copy_portals_and_treasures(DG_Room dg_room, Room *game_room) {
         ports[i].x = dg_room.portals[i].x;
         ports[i].y = dg_room.portals[i].y;
         ports[i].target_room_id = dg_room.portals[i].neighbor_id;
+        // TODO: Deal with .gated, and .switch_id
     }
 
     r_stat = room_set_portals(game_room, ports, dg_room.portal_count);
@@ -121,6 +122,27 @@ static void deep_copy_pushables(DG_Room dg_room, Room *game_room) {
 
     if (r_stat != OK) {
         printf("WL ERROR: Unexpected fault in pushables assignment to room ID %d\n", dg_room.id);
+    }
+}
+
+static void deep_copy_switches(DG_Room dg_room, Room *game_room) {
+    Switch *sws = NULL;
+    Status r_stat = OK;
+
+    // Deep copy the switches
+    sws = calloc(dg_room.switch_count, sizeof(Switch));
+
+    for (int i = 0; i < dg_room.switch_count; i++) {
+        sws[i].id = dg_room.switches[i].id;
+        sws[i].x = dg_room.switches[i].x;
+        sws[i].y = dg_room.switches[i].y;
+        sws[i].portal_id = dg_room.switches[i].portal_id;
+    }
+    
+    r_stat = room_set_switches(game_room, sws, dg_room.switch_count);
+
+    if (r_stat != OK) {
+        printf("WL ERROR: Unexpected fault in switches assignment to room ID %d\n", dg_room.id);
     }
 }
 
@@ -215,6 +237,7 @@ Status loader_load_world(const char *config_file,
         // Copy the rooms and portals in seperate function call to get under the Clang Tidy cognitive complexity limit threshold of 25
         deep_copy_portals_and_treasures(dg_room, game_room);
         deep_copy_pushables(dg_room, game_room);
+        deep_copy_switches(dg_room, game_room);
 
         // Add this new Room * to the graph
         g_stat = graph_insert(*graph_out, game_room);

@@ -202,6 +202,25 @@ Status room_set_pushables(Room *r, Pushable *pushables, int pushable_count) {
     return OK;
 }
 
+Status room_set_switches(Room *r, Switch *switches, int switch_count) {
+    if (r == NULL) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (switch_count > 0 && switches == NULL) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (r->switches != NULL) {
+        free(r->switches);
+    }
+
+    r->switches = switches;
+    r->switch_count = switch_count;
+
+    return OK;
+}
+
 Status room_place_treasure(Room *r, const Treasure *treasure) {
     if (r == NULL || treasure == NULL) {
         return INVALID_ARGUMENT;
@@ -380,6 +399,12 @@ Status room_render(const Room *r,
     // Layer over the pushables
     for (int i = 0; i < r->pushable_count; i++) {
         buffer[r->pushables[i].y * r->width + r->pushables[i].x] = charset->pushable;
+    }
+
+    // Layer over the switches
+    for (int i = 0; i < r->switch_count; i++) {
+        // TODO: Need some way to render switch_on at some poin. Maybe do a function to return a bool if there is a pushable at the same coords
+        buffer[r->switches[i].y * r->width + r->switches[i].x] = charset->switch_off;
     }
 
     return OK;

@@ -54,7 +54,7 @@ RPATH_LIB := -Wl,-rpath,'$$ORIGIN'
 LINK_PUZZLEGEN := -L$(DIST_DIR) -lpuzzlegen -lm
 
 # Phony targets
-.PHONY: all clean help student_so dist test tests c-render puzzlegen_demo mt ct
+.PHONY: all clean help student_so dist test tests c-render puzzlegen_demo mt ct dist
 
 # Default target
 all: student_so
@@ -146,6 +146,9 @@ ct:
 
 mt: test
 	CK_FORK=no valgrind --leak-check=full --track-origins=yes -s $(TEST_RUNNER)
+
+dist:
+	@$(MAKE) -C .. dist
 
 # Clean
 clean:

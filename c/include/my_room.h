@@ -66,6 +66,8 @@ Status custom_room_try_push_const(const Room *r, int pushable_idx, Direction dir
  */
 Status room_set_pushables(Room *r, Pushable *pushables, int pushable_count);
 
+Status room_set_switches(Room *r, Switch *switches, int switch_count);
+
 Status convert_dg_err_to_wl(int dg_status);
 
 /**
