@@ -180,6 +180,14 @@ lib.game_engine_get_charset.restype = POINTER(Charset)
 lib.game_engine_underfoot_portal.argtypes = [GameEngine]
 lib.game_engine_underfoot_portal.restype = c_int
 
+# Status game_engine_get_world_treasure_count(const GameEngine *eng, int *count_out)
+lib.game_engine_get_world_treasure_count.argtypes = [GameEngine, POINTER(c_int)]
+lib.game_engine_get_world_treasure_count.restype = c_int
+
+# Status game_engine_complete_room_count(const GameEngine *eng, int *count_out)
+lib.game_engine_complete_room_count.argtypes = [GameEngine, POINTER(c_int)]
+lib.game_engine_complete_room_count.restype = c_int
+
 # ============================================================
 # C Function Signatures - Player
 # ============================================================

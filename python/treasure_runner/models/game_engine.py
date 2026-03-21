@@ -115,3 +115,21 @@ class GameEngine:
 
         if stat != Status.OK:
             raise status_to_exception(stat, "ERROR: failed to use an underfoot portal by the GameEngine. Status: " + str(stat))
+
+    def get_world_treasure_count(self) -> int:
+        count_out = c_int()
+        stat = lib.game_engine_get_world_treasure_count(self._eng, byref(count_out))
+
+        if stat == Status.OK:
+            return count_out.value
+
+        raise status_to_exception(stat, "ERROR: failed to get the total number of treasures in the world. Status: " + str(stat))
+
+    def get_complete_room_count(self) -> int:
+        count_out = c_int()
+        stat = lib.game_engine_complete_room_count(self._eng, byref(count_out))
+
+        if stat == Status.OK:
+            return count_out.value
+
+        raise status_to_exception(stat, "ERROR: failed to get the count of complete rooms. Status: " + str(stat))
