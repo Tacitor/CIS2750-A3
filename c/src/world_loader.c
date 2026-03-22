@@ -72,7 +72,12 @@ static void deep_copy_portals_and_treasures(DG_Room dg_room, Room *game_room) {
         ports[i].x = dg_room.portals[i].x;
         ports[i].y = dg_room.portals[i].y;
         ports[i].target_room_id = dg_room.portals[i].neighbor_id;
-        // TODO: Deal with .gated, and .switch_id
+        ports[i].required_switch_id = dg_room.portals[i].required_switch_id;
+        ports[i].gated = false;
+
+        if (ports[i].required_switch_id != -1) {
+            ports[i].gated = true;
+        }
     }
 
     r_stat = room_set_portals(game_room, ports, dg_room.portal_count);

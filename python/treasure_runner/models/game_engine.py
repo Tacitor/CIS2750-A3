@@ -1,6 +1,6 @@
 import ctypes
 from ctypes import (
-    c_int, c_double, c_char_p, c_size_t, c_void_p, POINTER, byref
+    c_int, c_double, c_char_p, c_size_t, c_void_p, POINTER, byref, c_bool
 )
 
 from ..bindings import Direction, lib, Status, Charset
@@ -144,3 +144,14 @@ class GameEngine:
             return count_out.value
 
         raise status_to_exception(stat, "ERROR: failed to get the count of complete rooms. Status: " + str(stat))
+
+    def query_gated_portal(self) -> tuple[bool, int, int]:
+        has_gated = c_bool()
+        x_out = c_int()
+        y_out = c_int()
+        stat = lib.game_engine_query_gated_portal_current_room(self._eng, byref(has_gated), byref(x_out), byref(y_out))
+        
+        if stat == Status.OK:
+            return has_gated.value, x_out.value, y_out.value
+        
+        raise status_to_exception(stat, "ERROR: failed to query the gated portal. Status: " + str(stat))

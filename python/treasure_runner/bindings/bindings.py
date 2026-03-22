@@ -188,6 +188,10 @@ lib.game_engine_get_world_treasure_count.restype = c_int
 lib.game_engine_complete_room_count.argtypes = [GameEngine, POINTER(c_int)]
 lib.game_engine_complete_room_count.restype = c_int
 
+# Status game_engine_query_gated_portal_current_room(const GameEngine *eng, bool *has_gated, int *x_out, int *y_out)
+lib.game_engine_query_gated_portal_current_room.argtypes = [GameEngine, POINTER(c_bool), POINTER(c_int), POINTER(c_int)]
+lib.game_engine_query_gated_portal_current_room.restype = c_int
+
 # ============================================================
 # C Function Signatures - Player
 # ============================================================
