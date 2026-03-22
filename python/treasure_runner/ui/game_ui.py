@@ -115,7 +115,12 @@ class GameUI:
         for y in range(room_height):
             for x in range(room_width):
                 char = room_str[(y * room_width) + x + y]
-                stdscr.addch(room_row + y, x, char, curses.color_pair(self._get_char_colour_render(char)))
+                colour = self._get_char_colour_render(char)
+                
+                if char == self._cache_charset["portal"]:
+                    colour = self._get_portal_colour_render(x, y)
+                
+                stdscr.addch(room_row + y, x, char, curses.color_pair(colour))
 
     def _get_char_colour_render(self, char):
         charset = self._cache_charset
@@ -126,9 +131,7 @@ class GameUI:
         elif char == charset["pushable"]:
             colour = self.colour_green
         elif char == charset["portal"]:
-            # TODOFIXME: Add another check here if the portal should be magenta or cyan to show if its locked
-            # This needs a call to the GE. The GE will pass back the coords of the one locked portal in a room. If there is none it can return true/false (tuple of 3)
-            colour = self.colour_cyan
+            colour = 1 # This colour NEEDS to be updated in _get_portal_colour_render(). Get it alarm colour to see if required call is skipped.
         elif char == charset["switch_off"]:
             colour = self.colour_magenta
         elif char == charset["switch_on"]:
@@ -139,6 +142,14 @@ class GameUI:
             colour = 0
 
         return colour
+
+    def _get_portal_colour_render(self, x, y):
+        has_locked, x_gated, y_gated = self._eng.query_gated_portal()
+        
+        if has_locked and x == x_gated and y == y_gated:
+            return self.colour_magenta
+        
+        return self.colour_cyan
 
     def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
         game_element_height_offset = room_height + room_row + 1
