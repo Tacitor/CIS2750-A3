@@ -127,18 +127,18 @@ static bool internal_is_edge_position(int x_pos, int y_pos, const Room *room) {
     return false;
 }
 
-Status internal_teleport_player(GameEngine *eng, int portal_taget_room_id, const Room *current_room) {
+Status internal_teleport_player(GameEngine *eng, int portal_taget_room_id, const Room *current_room, int port_x, int port_y) {
     bool has_gated_and_locked = false;
-    int x_out = -1;
-    int y_out = -1;
+    int locked_x = -1;
+    int locked_y = -1;
 
-    Status stat = room_query_gated_portal(current_room, &has_gated_and_locked, &x_out, &y_out);
+    Status stat = room_query_gated_portal(current_room, &has_gated_and_locked, &locked_x, &locked_y);
 
     if (OK != stat) {
         return stat;
     }
 
-    if (has_gated_and_locked && portal_taget_room_id == room_get_portal_destination(current_room, x_out, y_out)) {
+    if (has_gated_and_locked && port_x == locked_x && port_y == locked_y) {
         return ROOM_IMPASSABLE;
     }
 
@@ -179,7 +179,7 @@ Status internal_portal_move(GameEngine *eng, int portal_taget_room_id, int x_que
     }
 
     // The rest of this function is all for edge portals which do not support "> – to go through a[n interior] portal"
-    return internal_teleport_player(eng, portal_taget_room_id, current_room);
+    return internal_teleport_player(eng, portal_taget_room_id, current_room, x_query, y_query);
 }
 
 static Status internal_parse_classified_tile(GameEngine *eng, int x_query, int y_query, const Room *current_room, Direction dir) {
@@ -297,7 +297,7 @@ Status game_engine_underfoot_portal(GameEngine *eng) {
         return ROOM_NO_PORTAL;
     }
 
-    return internal_teleport_player(eng, query_tile_id, current_room);;
+    return internal_teleport_player(eng, query_tile_id, current_room, eng->player->x, eng->player->y);;
 }
 
 Status game_engine_get_room_count(const GameEngine *eng, int *count_out) {

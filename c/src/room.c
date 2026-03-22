@@ -4,6 +4,7 @@
 
 //Forward declaration of private internal functions
 static bool *floor_grid_base_layer(int w, int h);
+bool internal_is_switch_on(const Room *r);
 
 Room *room_create(int id, const char *name,
                   int width, int height) {
@@ -403,8 +404,11 @@ Status room_render(const Room *r,
 
     // Layer over the switches
     for (int i = 0; i < r->switch_count; i++) {
-        // TODO: Need some way to render switch_on at some poin. Maybe do a function to return a bool if there is a pushable at the same coords
-        buffer[r->switches[i].y * r->width + r->switches[i].x] = charset->switch_off;
+        if (internal_is_switch_on(r)) {
+            buffer[r->switches[i].y * r->width + r->switches[i].x] = charset->switch_on;
+        } else {
+            buffer[r->switches[i].y * r->width + r->switches[i].x] = charset->switch_off;
+        }
     }
 
     return OK;
@@ -590,9 +594,7 @@ Status room_query_gated_portal(const Room *r, bool *has_gated, int *x_out, int *
     // Check all the portals if there is a gated one
     // "The generator only creates a switch if the room has at least 1 portal and 1 pushable. At most one switch per room"
     for (int i = 0; i < r->portal_count; i++) {
-        // TODO: Add a check to see if this gated portal is locked.
-        // Only set *has_gated = true IF it is gated AND still locked.
-        if (r->portals[i].gated) {
+        if (r->portals[i].gated && !internal_is_switch_on(r)) {
             *x_out = r->portals[i].x;
             *y_out = r->portals[i].y;
 
@@ -603,4 +605,16 @@ Status room_query_gated_portal(const Room *r, bool *has_gated, int *x_out, int *
 
     *has_gated = false;
     return OK;
+}
+
+bool internal_is_switch_on(const Room *r) {
+    if (r == NULL) {
+        return false;
+    }
+
+    if (r->switch_count < 1 || r->switches == NULL) {
+        return false;
+    }
+
+    return room_has_pushable_at(r, r->switches[0].x, r->switches[0].y, NULL);
 }
