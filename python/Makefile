@@ -22,7 +22,7 @@ pyhtml:
 	python3 -m coverage html -d coverage_html
 
 play:
-	python3 run_game.py --config ../assets/pushables.ini --profile ../assets/test.json
+	python3 run_game.py --config ../assets/switches.ini --profile ../assets/test.json
 
 dist:
 	@$(MAKE) -C .. dist

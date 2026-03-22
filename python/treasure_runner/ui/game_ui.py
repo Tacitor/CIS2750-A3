@@ -41,14 +41,17 @@ class GameUI:
     def launch(self):
         self._validate_user_info()
 
-        print("Launching the TUI...")
+        print(f"Launching {self.game_name}...")
         try:
             curses.wrapper(self._run_tui)
+        except curses.error as exc:
+            # TODOFIXME: Is this what they mean by raise an error? Should I be catching it again?
+            print("[ERROR] Sorry it looks like your terminal is too small to display the game.")
+            print(str(exc))
         except BufferError as exc:
             # TODOFIXME: Is this what they mean by raise an error? Should I be catching it again?
             print("[ERROR] Sorry it looks like your terminal is too small to display the game.")
             print(str(exc))
-        print("Done game and done with the GameEngine")
         self._eng.destroy()
         del self._eng
 
@@ -68,6 +71,10 @@ class GameUI:
         curses.init_pair(self.colour_green, curses.COLOR_GREEN, -1)
         curses.init_pair(self.colour_yellow, curses.COLOR_YELLOW, -1)
         curses.init_pair(self.colour_cyan, curses.COLOR_CYAN, -1)
+
+        if curses.can_change_color():
+            curses.init_color(curses.COLOR_BLACK, 400, 400, 400)
+
         curses.init_pair(self.colour_black, curses.COLOR_BLACK, -1)
 
         self._splash_startup(stdscr)
