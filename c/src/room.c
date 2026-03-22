@@ -391,14 +391,14 @@ Status room_render(const Room *r,
         }
     }
 
-    // Layer over the portals
-    for (int i = 0; i < r->portal_count; i++) {
-        buffer[r->portals[i].y * r->width + r->portals[i].x] = charset->portal;
-    }
-
     // Layer over the pushables
     for (int i = 0; i < r->pushable_count; i++) {
         buffer[r->pushables[i].y * r->width + r->pushables[i].x] = charset->pushable;
+    }
+
+    // Layer over the portals
+    for (int i = 0; i < r->portal_count; i++) {
+        buffer[r->portals[i].y * r->width + r->portals[i].x] = charset->portal;
     }
 
     // Layer over the switches
@@ -576,4 +576,31 @@ bool room_are_all_treasures_collected(const Room *r) {
     }
 
     return result;
+}
+
+Status room_query_gated_portal(const Room *r, bool *has_gated, int *x_out, int *y_out) {
+    if (r == NULL) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (has_gated == NULL || x_out == NULL || y_out == NULL) {
+        return NULL_POINTER;
+    }
+
+    // Check all the portals if there is a gated one
+    // "The generator only creates a switch if the room has at least 1 portal and 1 pushable. At most one switch per room"
+    for (int i = 0; i < r->portal_count; i++) {
+        // TODO: Add a check to see if this gated portal is locked.
+        // Only set *has_gated = true IF it is gated AND still locked.
+        if (r->portals[i].gated) {
+            *x_out = r->portals[i].x;
+            *y_out = r->portals[i].y;
+
+            *has_gated = true;
+            return OK;
+        }
+    }
+
+    *has_gated = false;
+    return OK;
 }

@@ -128,6 +128,8 @@ static bool internal_is_edge_position(int x_pos, int y_pos, const Room *room) {
 }
 
 Status internal_teleport_player(GameEngine *eng, int portal_taget_room_id) {
+    // TODO: Add a check for a gated and locked portal. If both gated AND locked do NOT teleport.
+    // Instead return ROOM_IMPASSABLE "You can't go that way" in the UI
     const Room *portal_targ_room = NULL;
     Status stat = internal_get_room_from_id(eng, portal_taget_room_id, &portal_targ_room);
 
@@ -614,4 +616,28 @@ Status game_engine_complete_room_count(const GameEngine *eng, int *count_out) {
     }
 
     return OK;
+}
+
+Status game_engine_query_gated_portal_current_room(const GameEngine *eng, bool *has_gated, int *x_out, int *y_out) {
+    if (NULL == eng || NULL == eng->player) {
+        return INVALID_ARGUMENT;
+    }
+
+    if (has_gated == NULL || x_out == NULL || y_out == NULL) {
+        return NULL_POINTER;
+    }
+
+    const Room *current_room = NULL;
+    Status stat = internal_get_room_from_id(eng, eng->player->room_id, &current_room);
+
+    if (GE_NO_SUCH_ROOM == stat || NULL == current_room) {
+        return GE_NO_SUCH_ROOM;
+    }
+
+    if (OK != stat) {
+        return INTERNAL_ERROR;
+    }
+
+    stat = room_query_gated_portal(current_room, has_gated, x_out, y_out);
+    return stat;
 }

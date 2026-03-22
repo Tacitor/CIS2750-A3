@@ -80,4 +80,19 @@ Status convert_dg_err_to_wl(int dg_status);
  */
 bool room_are_all_treasures_collected(const Room *r);
 
+/**
+ * Check all the portals in the room to see if one of them is gated.
+ * Keep in mind, "The generator only creates a switch if the room has
+ * at least 1 portal and 1 pushable. At most one switch per room"
+ * 
+ * Returns:
+ *  INVALID_ARGUMENT if r is NULL
+ *  NULL_POINTER if has_gated, x_out, or y_out is NULL
+ *  OK on success
+ *  has_gated is false if none of the portals are gated, or the gated one is unlocked.
+ *  has_gated is true if a gated portal exists and it is locked.
+ *      The x and y positon of this portal is then put in x_out and y_out
+ */
+Status room_query_gated_portal(const Room *r, bool *has_gated, int *x_out, int *y_out);
+
 #endif /* MY_ROOM_H */

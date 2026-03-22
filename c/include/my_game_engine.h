@@ -44,4 +44,19 @@ Status game_engine_get_world_treasure_count(const GameEngine *eng, int *count_ou
  */
 Status game_engine_complete_room_count(const GameEngine *eng, int *count_out);
 
+/**
+ * Check all the portals in the current room to see if one of them is gated.
+ * Keep in mind, "The generator only creates a switch if the room has
+ * at least 1 portal and 1 pushable. At most one switch per room"
+ * 
+ * Returns:
+ *  INVALID_ARGUMENT if eng or eng->player is NULL
+ *  NULL_POINTER if has_gated, x_out, or y_out is NULL
+ *  OK on success
+ *  has_gated is false if none of the portals are gated, or the gated one is unlocked.
+ *  has_gated is true if a gated portal exists and it is locked.
+ *      The x and y positon of this portal is then put in x_out and y_out
+ */
+Status game_engine_query_gated_portal_current_room(const GameEngine *eng, bool *has_gated, int *x_out, int *y_out);
+
 #endif /* MY_GAME_ENGINE_H */
