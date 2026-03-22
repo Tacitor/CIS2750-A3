@@ -60,6 +60,7 @@ class GameUI:
         curses.init_pair(2, curses.COLOR_MAGENTA, -1) # User default background colour
         curses.init_pair(3, curses.COLOR_GREEN, -1)
         curses.init_pair(4, curses.COLOR_YELLOW, -1)
+        curses.init_pair(5, curses.COLOR_CYAN, -1)
 
         self._splash_startup(stdscr)
         self._splash_player_info(stdscr)
@@ -101,10 +102,33 @@ class GameUI:
 
     def _ui_render_room(self, stdscr, room_row):
         room_str = self._eng.render_current_room()
-        player_x, player_y = self._eng.player.get_position()
+        room_width, room_height = self._eng.get_room_dimensions()
+
+        for y in range(room_height):
+            for x in range(room_width):
+                char = room_str[(y * room_width) + x + y]
+                stdscr.addch(room_row + y, x, char, curses.color_pair(self._get_char_colour_render(char)))
+
+    def _get_char_colour_render(self, char):
         charset = self._eng.get_charset()
-        safe_addstr(stdscr, room_row, 0, room_str)
-        stdscr.addch(room_row + player_y, 0 + player_x, charset.contents.player.decode("utf-8"), curses.color_pair(2))
+        if char == charset.contents.player.decode("utf-8"):
+            colour = 2 #magenta
+        elif char == charset.contents.treasure.decode("utf-8"):
+            colour = 4 #yellow
+        elif char == charset.contents.pushable.decode("utf-8"):
+            colour = 3 #green
+        elif char == charset.contents.portal.decode("utf-8"):
+            # TODOFIXME: Add another check here if the portal should be magenta or cyan to show if its locked
+            # This needs a call to the GE. The GE will pass back the coords of the one locked portal in a room. If there is none it can return true/false (tuple of 3)
+            colour = 5 #cyan
+        elif char == charset.contents.switch_off.decode("utf-8"):
+            colour = 2 #magenta
+        elif char == charset.contents.switch_on.decode("utf-8"):
+            colour = 5 #cyan
+        else:
+            colour = 0
+
+        return colour
 
     def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
         game_element_height_offset = room_height + room_row + 1
