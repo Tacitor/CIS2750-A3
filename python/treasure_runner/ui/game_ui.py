@@ -169,28 +169,26 @@ class GameUI:
         safe_addstr(stdscr, 5, game_element_width_offset, charset["player"] + " - Julia")
         safe_addstr_colour(stdscr, 5, game_element_width_offset, charset["player"], curses.color_pair(self.colour_magenta))
 
-        safe_addstr(stdscr, 6, game_element_width_offset, charset["wall"] + " - wall")
+        safe_addstr(stdscr, 6, game_element_width_offset, charset["portal"] + " - portal off")
+        safe_addstr_colour(stdscr, 6, game_element_width_offset, charset["portal"], curses.color_pair(self.colour_magenta))
+        safe_addstr(stdscr, 7, game_element_width_offset, charset["portal"] + " - portal on")
+        safe_addstr_colour(stdscr, 7, game_element_width_offset, charset["portal"], curses.color_pair(self.colour_cyan))
 
-        safe_addstr(stdscr, 7, game_element_width_offset, charset["treasure"] + " - gold")
-        safe_addstr_colour(stdscr, 7, game_element_width_offset, charset["treasure"], curses.color_pair(self.colour_yellow))
+        safe_addstr(stdscr, 8, game_element_width_offset, charset["switch_off"] + " - switch off")
+        safe_addstr_colour(stdscr, 8, game_element_width_offset, charset["switch_off"], curses.color_pair(self.colour_magenta))
+        safe_addstr(stdscr, 9, game_element_width_offset, charset["switch_on"] + " - switch on")
+        safe_addstr_colour(stdscr, 9, game_element_width_offset, charset["switch_on"], curses.color_pair(self.colour_cyan))
 
-        safe_addstr(stdscr, 8, game_element_width_offset, charset["portal"] + " - portal off")
-        safe_addstr_colour(stdscr, 8, game_element_width_offset, charset["portal"], curses.color_pair(self.colour_magenta))
+        safe_addstr(stdscr, 10, game_element_width_offset, charset["wall"] + " - wall")
 
-        safe_addstr(stdscr, 9, game_element_width_offset, charset["portal"] + " - portal on")
-        safe_addstr_colour(stdscr, 9, game_element_width_offset, charset["portal"], curses.color_pair(self.colour_cyan))
+        safe_addstr(stdscr, 11, game_element_width_offset, charset["floor"] + " - floor")
+        safe_addstr_colour(stdscr, 11, game_element_width_offset, charset["floor"], curses.color_pair(self.colour_black))
 
-        safe_addstr(stdscr, 10, game_element_width_offset, charset["floor"] + " - floor")
-        safe_addstr_colour(stdscr, 10, game_element_width_offset, charset["floor"], curses.color_pair(self.colour_black))
+        safe_addstr(stdscr, 12, game_element_width_offset, charset["treasure"] + " - gold")
+        safe_addstr_colour(stdscr, 12, game_element_width_offset, charset["treasure"], curses.color_pair(self.colour_yellow))
 
-        safe_addstr(stdscr, 11, game_element_width_offset, charset["pushable"] + " - pushable obstacle")
-        safe_addstr_colour(stdscr, 11, game_element_width_offset, charset["pushable"], curses.color_pair(self.colour_green))
-
-        safe_addstr(stdscr, 12, game_element_width_offset, charset["switch_off"] + " - switch off")
-        safe_addstr_colour(stdscr, 12, game_element_width_offset, charset["switch_off"], curses.color_pair(self.colour_magenta))
-
-        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset["switch_on"] + " - switch on")
-        safe_addstr_colour(stdscr, side_bar_lowest, game_element_width_offset, charset["switch_on"], curses.color_pair(self.colour_cyan))
+        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset["pushable"] + " - pushable obstacle")
+        safe_addstr_colour(stdscr, side_bar_lowest, game_element_width_offset, charset["pushable"], curses.color_pair(self.colour_green))
 
     def _ui_render_email(self, stdscr, term_x, game_element_height_offset):
         email_pos = term_x - len(self.email)
