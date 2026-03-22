@@ -116,10 +116,10 @@ class GameUI:
             for x in range(room_width):
                 char = room_str[(y * room_width) + x + y]
                 colour = self._get_char_colour_render(char)
-                
+
                 if char == self._cache_charset["portal"]:
                     colour = self._get_portal_colour_render(x, y)
-                
+
                 stdscr.addch(room_row + y, x, char, curses.color_pair(colour))
 
     def _get_char_colour_render(self, char):
@@ -145,10 +145,10 @@ class GameUI:
 
     def _get_portal_colour_render(self, x, y):
         has_locked, x_gated, y_gated = self._eng.query_gated_portal()
-        
+
         if has_locked and x == x_gated and y == y_gated:
             return self.colour_magenta
-        
+
         return self.colour_cyan
 
     def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
