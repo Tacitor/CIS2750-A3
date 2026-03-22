@@ -80,13 +80,24 @@ class GameEngine:
 
         raise status_to_exception(stat, "ERROR: failed to get the name of the current room. Status: " + str(stat))
 
-    def get_charset(self) -> Charset:
-        char_set = lib.game_engine_get_charset(self._eng)
+    def get_charset(self) -> dict[str, str]:
+        c_char_set = lib.game_engine_get_charset(self._eng)
 
-        if char_set is None:
+        if c_char_set is None:
             raise RuntimeError("ERROR: failed to get the charset from the GameEngine")
 
-        return char_set
+        py_char_set = {
+            "wall": c_char_set.contents.wall.decode("utf-8"),
+            "floor": c_char_set.contents.floor.decode("utf-8"),
+            "player": c_char_set.contents.player.decode("utf-8"),
+            "pushable": c_char_set.contents.pushable.decode("utf-8"),
+            "treasure": c_char_set.contents.treasure.decode("utf-8"),
+            "portal": c_char_set.contents.portal.decode("utf-8"),
+            "switch_off": c_char_set.contents.switch_off.decode("utf-8"),
+            "switch_on": c_char_set.contents.switch_on.decode("utf-8")
+        }
+
+        return py_char_set
 
     def get_room_ids(self) -> list[int]:
         all_ids = POINTER(c_int)()

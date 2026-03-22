@@ -18,6 +18,7 @@ class GameUI:
         self._cache_player_collected_gold = self._eng.player.get_collected_count() # Local cache of player gold for UI display purpose. Used to update the message bar if a player collects a treasure
         self._cache_player_room_id = self._eng.player.get_room() # Another local cache just for UI detection and status message prompting
         self._cache_world_gold_total_count = self._eng.get_world_treasure_count()
+        self._cache_charset = self._eng.get_charset()
 
         self.rooms_played = 0
         self.rooms_left = 0
@@ -27,9 +28,15 @@ class GameUI:
         self.email = "lkrampit@uoguelph.ca"
         self.game_controls = "Game Controls: Arrow-keys/WASD to move, > to use an underfoot portal, q to quit, and r to reset whole game."
 
-        gold_char = self._eng.get_charset().contents.treasure.decode("utf-8")
+        gold_char = self._cache_charset["treasure"]
         self._message_bar = f"Collect all the gold ({gold_char}). Start by moving around."
         self._message_bar_colour = 4
+
+        self.colour_magenta = 2
+        self.colour_green = 3
+        self.colour_yellow = 4
+        self.colour_cyan = 5
+        self.colour_black = 6
 
     def launch(self):
         self._validate_user_info()
@@ -57,10 +64,11 @@ class GameUI:
 
         stdscr.clear()
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
-        curses.init_pair(2, curses.COLOR_MAGENTA, -1) # User default background colour
-        curses.init_pair(3, curses.COLOR_GREEN, -1)
-        curses.init_pair(4, curses.COLOR_YELLOW, -1)
-        curses.init_pair(5, curses.COLOR_CYAN, -1)
+        curses.init_pair(self.colour_magenta, curses.COLOR_MAGENTA, -1) # User default background colour
+        curses.init_pair(self.colour_green, curses.COLOR_GREEN, -1)
+        curses.init_pair(self.colour_yellow, curses.COLOR_YELLOW, -1)
+        curses.init_pair(self.colour_cyan, curses.COLOR_CYAN, -1)
+        curses.init_pair(self.colour_black, curses.COLOR_BLACK, -1)
 
         self._splash_startup(stdscr)
         self._splash_player_info(stdscr)
@@ -110,21 +118,23 @@ class GameUI:
                 stdscr.addch(room_row + y, x, char, curses.color_pair(self._get_char_colour_render(char)))
 
     def _get_char_colour_render(self, char):
-        charset = self._eng.get_charset()
-        if char == charset.contents.player.decode("utf-8"):
-            colour = 2 #magenta
-        elif char == charset.contents.treasure.decode("utf-8"):
-            colour = 4 #yellow
-        elif char == charset.contents.pushable.decode("utf-8"):
-            colour = 3 #green
-        elif char == charset.contents.portal.decode("utf-8"):
+        charset = self._cache_charset
+        if char == charset["player"]:
+            colour = self.colour_magenta
+        elif char == charset["treasure"]:
+            colour = self.colour_yellow
+        elif char == charset["pushable"]:
+            colour = self.colour_green
+        elif char == charset["portal"]:
             # TODOFIXME: Add another check here if the portal should be magenta or cyan to show if its locked
             # This needs a call to the GE. The GE will pass back the coords of the one locked portal in a room. If there is none it can return true/false (tuple of 3)
-            colour = 5 #cyan
-        elif char == charset.contents.switch_off.decode("utf-8"):
-            colour = 2 #magenta
-        elif char == charset.contents.switch_on.decode("utf-8"):
-            colour = 5 #cyan
+            colour = self.colour_cyan
+        elif char == charset["switch_off"]:
+            colour = self.colour_magenta
+        elif char == charset["switch_on"]:
+            colour = self.colour_cyan
+        elif char == charset["floor"]:
+            colour = self.colour_black
         else:
             colour = 0
 
@@ -133,7 +143,7 @@ class GameUI:
     def _ui_render_side_bar_and_status(self, stdscr, room_row, room_width, room_height):
         game_element_height_offset = room_height + room_row + 1
 
-        side_bar_lowest = 10
+        side_bar_lowest = 13
 
         term_y, term_x = stdscr.getmaxyx()
         term_y += 1 # Useless operation on this var to let the linter be happy
@@ -144,10 +154,10 @@ class GameUI:
             game_element_height_offset = side_bar_lowest + 2
 
         safe_addstr(stdscr, game_element_height_offset, 0, self.game_controls)
-        safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(4))
+        safe_addstr_colour(stdscr, game_element_height_offset, 0, "Game Controls:", curses.color_pair(self.colour_yellow))
         safe_addstr(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status: " + str(self._eng.player.get_collected_count()) + f" gold collected, {self.rooms_played} room(s) played, {self.rooms_left} room(s) left")
-        safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status:", curses.color_pair(4))
-        safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(2))
+        safe_addstr_colour(stdscr, game_element_height_offset + 2, 0, self._user_info.name + " Status:", curses.color_pair(self.colour_yellow))
+        safe_addstr_colour(stdscr, game_element_height_offset + 3, 0, self.game_name, curses.color_pair(self.colour_magenta))
 
         self._ui_render_email(stdscr, term_x, game_element_height_offset)
 
@@ -155,16 +165,32 @@ class GameUI:
         game_element_width_offset = room_width + 5
 
         safe_addstr(stdscr, 3, game_element_width_offset, "Game Elements:")
-        charset = self._eng.get_charset()
-        safe_addstr(stdscr, 5, game_element_width_offset, charset.contents.player.decode("utf-8") + " - Julia")
-        safe_addstr_colour(stdscr, 5, game_element_width_offset, charset.contents.player.decode("utf-8"), curses.color_pair(2))
-        safe_addstr(stdscr, 6, game_element_width_offset, charset.contents.wall.decode("utf-8") + " - wall")
-        safe_addstr(stdscr, 7, game_element_width_offset, charset.contents.treasure.decode("utf-8") + " - gold")
-        safe_addstr(stdscr, 8, game_element_width_offset, charset.contents.portal.decode("utf-8") + " - portal")
-        safe_addstr(stdscr, 9, game_element_width_offset, charset.contents.floor.decode("utf-8") + " - floor")
-        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset.contents.pushable.decode("utf-8") + " - pushable obstacle")
-        # safe_addstr(stdscr, 11, game_element_width_offset, charset.contents.switch_off.decode("utf-8") + " - switch off")
-        # safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset.contents.switch_on.decode("utf-8") + " - switch on")
+        charset = self._cache_charset
+        safe_addstr(stdscr, 5, game_element_width_offset, charset["player"] + " - Julia")
+        safe_addstr_colour(stdscr, 5, game_element_width_offset, charset["player"], curses.color_pair(self.colour_magenta))
+
+        safe_addstr(stdscr, 6, game_element_width_offset, charset["wall"] + " - wall")
+
+        safe_addstr(stdscr, 7, game_element_width_offset, charset["treasure"] + " - gold")
+        safe_addstr_colour(stdscr, 7, game_element_width_offset, charset["treasure"], curses.color_pair(self.colour_yellow))
+
+        safe_addstr(stdscr, 8, game_element_width_offset, charset["portal"] + " - portal off")
+        safe_addstr_colour(stdscr, 8, game_element_width_offset, charset["portal"], curses.color_pair(self.colour_magenta))
+
+        safe_addstr(stdscr, 9, game_element_width_offset, charset["portal"] + " - portal on")
+        safe_addstr_colour(stdscr, 9, game_element_width_offset, charset["portal"], curses.color_pair(self.colour_cyan))
+
+        safe_addstr(stdscr, 10, game_element_width_offset, charset["floor"] + " - floor")
+        safe_addstr_colour(stdscr, 10, game_element_width_offset, charset["floor"], curses.color_pair(self.colour_black))
+
+        safe_addstr(stdscr, 11, game_element_width_offset, charset["pushable"] + " - pushable obstacle")
+        safe_addstr_colour(stdscr, 11, game_element_width_offset, charset["pushable"], curses.color_pair(self.colour_green))
+
+        safe_addstr(stdscr, 12, game_element_width_offset, charset["switch_off"] + " - switch off")
+        safe_addstr_colour(stdscr, 12, game_element_width_offset, charset["switch_off"], curses.color_pair(self.colour_magenta))
+
+        safe_addstr(stdscr, side_bar_lowest, game_element_width_offset, charset["switch_on"] + " - switch on")
+        safe_addstr_colour(stdscr, side_bar_lowest, game_element_width_offset, charset["switch_on"], curses.color_pair(self.colour_cyan))
 
     def _ui_render_email(self, stdscr, term_x, game_element_height_offset):
         email_pos = term_x - len(self.email)
@@ -184,7 +210,7 @@ class GameUI:
             self._message_bar = "You can't go that way!"
             self._message_bar_colour = 2
         except NoPortalError:
-            portal_char = self._eng.get_charset().contents.portal.decode("utf-8")
+            portal_char = self._cache_charset["portal"]
             self._message_bar = f"You need to be standing on a portal ({portal_char}) to teleport."
             self._message_bar_colour = 4
         except GameEngineError:
@@ -236,13 +262,13 @@ class GameUI:
     def _splash_startup(self, stdscr):
         stdscr.clear()
         safe_addstr_colour(stdscr, 0, 0, self.game_name, curses.color_pair(1))
-        safe_addstr_colour(stdscr, 1, 0, "is a Sokoban-style puzzle game.", curses.color_pair(2))
-        safe_addstr_colour(stdscr, 2, 0, "Take control of Julia as she explores a world of mazes on her search for treasures.", curses.color_pair(2))
+        safe_addstr_colour(stdscr, 1, 0, "is a Sokoban-style puzzle game.", curses.color_pair(self.colour_magenta))
+        safe_addstr_colour(stdscr, 2, 0, "Take control of Julia as she explores a world of mazes on her search for treasures.", curses.color_pair(self.colour_magenta))
 
     def _splash_quit(self , stdscr):
         stdscr.clear()
         safe_addstr_colour(stdscr, 0, 0, "Game over", curses.color_pair(1))
-        safe_addstr_colour(stdscr, 1, 0, "Thanks for playing", curses.color_pair(2))
+        safe_addstr_colour(stdscr, 1, 0, "Thanks for playing", curses.color_pair(self.colour_magenta))
         time1 = datetime.fromisoformat(self._user_info.timestamp_last_played)
         time2 = datetime.fromisoformat(self._user_info.timestamp_started_game)
         time_diff = time1 - time2
@@ -251,7 +277,7 @@ class GameUI:
     def _splash_win(self , stdscr):
         stdscr.clear()
         safe_addstr_colour(stdscr, 0, 0, "You Win!", curses.color_pair(1))
-        safe_addstr_colour(stdscr, 1, 0, "Thanks for playing. Congratulations on your victory.", curses.color_pair(2))
+        safe_addstr_colour(stdscr, 1, 0, "Thanks for playing. Congratulations on your victory.", curses.color_pair(self.colour_magenta))
         time1 = datetime.fromisoformat(self._user_info.timestamp_last_played)
         time2 = datetime.fromisoformat(self._user_info.timestamp_started_game)
         time_diff = time1 - time2
@@ -264,7 +290,7 @@ class GameUI:
         safe_addstr(stdscr, 6, 0, "Treasure high score: " + str(self._user_info.max_treasure_collected))
         safe_addstr(stdscr, 7, 0, "Biggest world completed: " + str(self._user_info.most_rooms_world_completed))
         safe_addstr(stdscr, 8, 0, "Last played: " + self._user_info.timestamp_last_played)
-        safe_addstr_colour(stdscr, 10, 5, "Press any key to continue...", curses.color_pair(3))
+        safe_addstr_colour(stdscr, 10, 5, "Press any key to continue...", curses.color_pair(self.colour_green))
         stdscr.refresh() # Screen is redrawn — not printed
 
         char = stdscr.getch() # Waits for a single key press (no Enter required)
