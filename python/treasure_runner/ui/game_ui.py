@@ -62,7 +62,7 @@ class GameUI:
         curses.use_default_colors() # Use terminal defaults
 
         stdscr.clear()
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_MAGENTA)
         curses.init_pair(self.colour_magenta, curses.COLOR_MAGENTA, -1) # User default background colour
         curses.init_pair(self.colour_green, curses.COLOR_GREEN, -1)
         curses.init_pair(self.colour_yellow, curses.COLOR_YELLOW, -1)
