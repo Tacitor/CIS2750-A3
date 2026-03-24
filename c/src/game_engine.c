@@ -119,14 +119,6 @@ Status internal_bump_query_in_dir(int *x_query, int *y_query, Direction dir) {
     return OK;
 }
 
-static bool internal_is_edge_position(int x_pos, int y_pos, const Room *room) {
-    if (x_pos == 0 || y_pos == 0 || x_pos == room->width-1 || y_pos == room->height-1) {
-        return true;
-    }
-
-    return false;
-}
-
 Status internal_teleport_player(GameEngine *eng, int portal_taget_room_id, const Room *current_room, int port_x, int port_y) {
     bool has_gated_and_locked = false;
     int locked_x = -1;
@@ -172,7 +164,7 @@ Status internal_teleport_player(GameEngine *eng, int portal_taget_room_id, const
 Status internal_portal_move(GameEngine *eng, int portal_taget_room_id, int x_query, int y_query, const Room *current_room) {
     // Support for "> – to go through a[n interior] portal"
     // A player can walk all over an interior portal and MUST press '>' to use an interior portal
-    if (!internal_is_edge_position(x_query, y_query, current_room)) {
+    if (!is_edge_position(x_query, y_query, current_room)) {
         eng->player->x = x_query;
         eng->player->y = y_query;
         return OK;

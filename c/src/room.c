@@ -5,6 +5,7 @@
 //Forward declaration of private internal functions
 static bool *floor_grid_base_layer(int w, int h);
 bool internal_is_switch_on(const Room *r);
+bool internal_do_consume_pushable(const Room *r, int push_x, int push_y);
 
 Room *room_create(int id, const char *name,
                   int width, int height) {
@@ -301,7 +302,9 @@ bool room_is_walkable(const Room *r, int x, int y) {
         return false;
     }
 
-    if (room_has_pushable_at(r, x, y, NULL)) {
+    bool do_consume_pushable = internal_do_consume_pushable(r, x, y);
+
+    if (room_has_pushable_at(r, x, y, NULL) && !do_consume_pushable) {
         return false;
     }
 
@@ -347,7 +350,8 @@ RoomTileType room_classify_tile(const Room *r,
 
     //Check for a pushable
     bool has_push = room_has_pushable_at(r, x, y, &potential_id);
-    if (has_push) {
+    bool do_consume_pushable = internal_do_consume_pushable(r, x, y);
+    if (has_push && !do_consume_pushable) {
         if (out_id != NULL) {
             *out_id = potential_id;
         }
@@ -617,4 +621,49 @@ bool internal_is_switch_on(const Room *r) {
     }
 
     return room_has_pushable_at(r, r->switches[0].x, r->switches[0].y, NULL);
+}
+
+bool is_edge_position(int x_pos, int y_pos, const Room *room) {
+    if (x_pos == 0 || y_pos == 0 || x_pos == room->width-1 || y_pos == room->height-1) {
+        return true;
+    }
+
+    return false;
+}
+
+int internal_find_portal_index_by_id(const Room *r, int port_id) {
+    if (r == NULL || r->portals == NULL || r->portal_count == 0) {
+        return -1;
+    }
+
+    //This list is not sorted and not big it does not make sense to sort
+    for (int i = 0; i < r->portal_count; i++) {
+        if (r->portals[i].id == port_id) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+bool internal_do_consume_pushable(const Room *r, int push_x, int push_y) {
+    if (r == NULL) {
+        return false;
+    }
+
+    if (r->switch_count < 1 || r->switches == NULL || r->portal_count == 0 || r->portals == NULL) {
+        return false;
+    }
+
+    bool has_pushable_on_switch = room_has_pushable_at(r, r->switches[0].x, r->switches[0].y, NULL);
+
+    if (has_pushable_on_switch && push_x == r->switches[0].x && push_y == r->switches[0].y) {
+        int port_id = internal_find_portal_index_by_id(r, r->switches[0].portal_id);
+
+        if (port_id != -1 && is_edge_position(r->portals[port_id].x, r->portals[port_id].y, r)) {
+            return true;
+        }
+    }
+
+    return false;
 }

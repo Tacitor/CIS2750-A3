@@ -95,4 +95,6 @@ bool room_are_all_treasures_collected(const Room *r);
  */
 Status room_query_gated_portal(const Room *r, bool *has_gated, int *x_out, int *y_out);
 
+bool is_edge_position(int x_pos, int y_pos, const Room *room);
+
 #endif /* MY_ROOM_H */
