@@ -44,14 +44,10 @@ class GameUI:
         print(f"Launching {self.game_name}...")
         try:
             curses.wrapper(self._run_tui)
-        except curses.error as exc:
-            # TODOFIXME: Is this what they mean by raise an error? Should I be catching it again?
+        except (BufferError, curses.error):
+            # Give a user prompt on how to fix issue
             print("[ERROR] Sorry it looks like your terminal is too small to display the game.")
-            print(str(exc))
-        except BufferError as exc:
-            # TODOFIXME: Is this what they mean by raise an error? Should I be catching it again?
-            print("[ERROR] Sorry it looks like your terminal is too small to display the game.")
-            print(str(exc))
+            print("Please resize the terminal to be bigger, and try again.")
         self._eng.destroy()
         del self._eng
 

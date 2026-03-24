@@ -460,8 +460,6 @@ Status custom_room_pick_up_treasure_const(const Room *r, int treasure_id, Treasu
         return INVALID_ARGUMENT;
     }
 
-    // TODO: Return INVALID_ARG if treasure_id is negative??
-
     for (int i = 0; i < r->treasure_count; i++) {
         if (r->treasures[i].id == treasure_id) {
             if (r->treasures[i].collected) {

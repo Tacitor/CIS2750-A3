@@ -202,8 +202,6 @@ static Status internal_parse_classified_tile(GameEngine *eng, int x_query, int y
         
         // The room has pushed the pushable in the direction specified. The player may now take this spot.
         if (OK == stat) {
-            // TODO: Does there need to be another walkbale check? Is a pushable ever going to be on a non-floor tile?
-            // They are able to be on top of portals so there is a chance I guess...
             eng->player->x = x_query;
             eng->player->y = y_query;
         }
