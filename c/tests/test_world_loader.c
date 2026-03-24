@@ -183,6 +183,61 @@ START_TEST(test_world_loader_switches)
 END_TEST
 
 /* ============================================================
+ * Test 7: Make sure room names are good.
+ * ============================================================ */
+START_TEST(test_world_room_names)
+{
+    Graph *gr = NULL;
+    Room *r_first = NULL;
+    int room_num = 0;
+    Charset set = {0};
+
+    ck_assert_int_eq(loader_load_world("../assets/alt_char.ini", &gr, &r_first, &room_num, &set), OK);
+
+    const void *const *rooms = NULL;
+    int rm_count = 0;
+
+    GraphStatus temp_stat = graph_get_all_payloads(gr, &rooms, &rm_count);
+
+    ck_assert_int_eq(temp_stat, GRAPH_STATUS_OK);
+    ck_assert_int_eq(rm_count, room_num);
+    
+    const Room *temp_room = rooms[0];
+    ck_assert_str_eq(temp_room->name, "Start");
+
+    temp_room = rooms[1];
+    ck_assert_str_eq(temp_room->name, "First");
+
+    temp_room = rooms[2];
+    ck_assert_str_eq(temp_room->name, "Second");
+
+    temp_room = rooms[3];
+    ck_assert_str_eq(temp_room->name, "Third");
+
+    temp_room = rooms[4];
+    ck_assert_str_eq(temp_room->name, "Fourth");
+
+    temp_room = rooms[5];
+    ck_assert_str_eq(temp_room->name, "Fifth");
+
+    temp_room = rooms[6];
+    ck_assert_str_eq(temp_room->name, "Regular");
+
+    temp_room = rooms[7];
+    ck_assert_str_eq(temp_room->name, "Regular");
+
+    temp_room = rooms[8];
+    ck_assert_str_eq(temp_room->name, "Regular");
+
+    temp_room = rooms[9];
+    ck_assert_str_eq(temp_room->name, "Regular");
+
+    // Free all graph and room memory
+    graph_destroy(gr);
+}
+END_TEST
+
+/* ============================================================
  * Suite Creation Function
  * 
  * This function builds and returns a test suite for the Check framework.
@@ -208,6 +263,7 @@ Suite *world_loader_suite(void)
     tcase_add_test(tc_load, test_convert_dg_err_to_wl);
     tcase_add_test(tc_load, test_world_loader_pushables);
     tcase_add_test(tc_load, test_world_loader_switches);
+    tcase_add_test(tc_load, test_world_room_names);
 
     // Add the test case to the suite
     suite_add_tcase(s, tc_load);

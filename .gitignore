@@ -36,6 +36,12 @@ dist/*
 *.tmp
 .coverage
 
+# Test coverage artifacts
+coverage_build/
+coverage_bin/
+coverage_info/
+*.gcov
+
 # Virtual environments
 venv/
 env/

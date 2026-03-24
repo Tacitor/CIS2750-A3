@@ -362,6 +362,8 @@ START_TEST(test_set_portals_null)
 
     ck_assert_int_eq(room_set_portals(r, NULL, port_num), INVALID_ARGUMENT);
     ck_assert_int_eq(room_set_portals(NULL, p, port_num), INVALID_ARGUMENT);
+    ck_assert_int_eq(room_set_portals(NULL, p, 0), INVALID_ARGUMENT);
+    ck_assert_int_eq(room_set_portals(NULL, NULL, 0), INVALID_ARGUMENT);
 }
 END_TEST
 
@@ -1417,7 +1419,7 @@ END_TEST
  * Test 53: Test pushing pushables
  * Tests that room_try_push is correct
  * ============================================================ */
-START_TEST(test_psuh_pushables)
+START_TEST(test_push_pushables)
 {
     ck_assert_int_eq(room_try_push(r, 0, DIR_WEST), INVALID_ARGUMENT);
     r->pushable_count = 1;
@@ -1509,6 +1511,90 @@ START_TEST(test_psuh_pushables)
 END_TEST
 
 /* ============================================================
+ * Test 54: Test setting switches on NULL
+ * Tests that room_set_switches returns INVALID_ARGUMENT on NULL input
+ * ============================================================ */
+START_TEST(test_set_switches_null)
+{
+    int sw_num = 3;
+    Switch sws[sw_num];
+    for (int i = 0; i < sw_num; i++) {
+        sws[i].id = i;
+        sws[i].portal_id = i + 1;
+        sws[i].x = 0;
+        sws[i].y = i + 1;
+    }
+
+    ck_assert_int_eq(room_set_switches(r, NULL, sw_num), INVALID_ARGUMENT);
+    ck_assert_int_eq(room_set_switches(NULL, sws, sw_num), INVALID_ARGUMENT);
+    ck_assert_int_eq(room_set_switches(NULL, sws, 0), INVALID_ARGUMENT);
+}
+END_TEST
+
+/* ============================================================
+ * Test 55: Test setting switches on short array
+ * Tests that room_set_switches side effects are correct in setting the switches
+ * ============================================================ */
+START_TEST(test_set_switches_reg)
+{
+    int sw_num = 3;
+    Switch *sws = calloc(sw_num, sizeof(Switch));
+    for (int i = 0; i < sw_num; i++) {
+        sws[i].id = i;
+        sws[i].portal_id = i + 1;
+        sws[i].x = 0;
+        sws[i].y = i + 1;
+    }
+
+    ck_assert_int_eq(room_set_switches(r, sws, sw_num), OK);
+
+    ck_assert_int_eq(r->switch_count, sw_num);
+    ck_assert_ptr_eq(sws, r->switches);
+}
+END_TEST
+
+/* ============================================================
+ * Test 56: Test overwitting switches
+ * Tests that room_set_switchesr side effects are correct in overwitting the switches
+ * ============================================================ */
+START_TEST(test_set_switches_overwrite)
+{
+    int sw_num = 3;
+    Switch *sws = calloc(sw_num, sizeof(Switch));
+    for (int i = 0; i < sw_num; i++) {
+        sws[i].id = i;
+        sws[i].portal_id = i + 1;
+        sws[i].x = 0;
+        sws[i].y = i + 1;
+    }
+
+    ck_assert_int_eq(room_set_switches(r, sws, sw_num), OK);
+
+    ck_assert_int_eq(r->switch_count, sw_num);
+    ck_assert_ptr_eq(sws, r->switches);
+
+    sw_num = 4;
+    Switch *q = calloc(sw_num, sizeof(Switch));
+    for (int i = 0; i < sw_num; i++) {
+        q[i].id = 5 + i;
+        q[i].portal_id = i + 5;
+        q[i].x = 0;
+        q[i].y = i + 1;
+    }
+
+    ck_assert_int_eq(room_set_switches(r, q, sw_num), OK);
+
+    ck_assert_int_eq(r->switch_count, sw_num);
+    ck_assert_ptr_eq(q, r->switches);
+
+    ck_assert_int_eq(r->switches[0].id, 5);
+    ck_assert_int_eq(r->switches[1].id, 6);
+    ck_assert_int_eq(r->switches[2].id, 7);
+    ck_assert_int_eq(r->switches[3].id, 8);
+}
+END_TEST
+
+/* ============================================================
  * Suite Creation Function
  * 
  * This function builds and returns a test suite for the Check framework.
@@ -1593,7 +1679,11 @@ Suite *room_suite(void)
     tcase_add_test(tc_other, test_room_get_id);
     tcase_add_test(tc_other, test_room_destory_treasure);
     tcase_add_test(tc_other, test_room_pickup_treasure);
-    tcase_add_test(tc_other, test_psuh_pushables);
+    tcase_add_test(tc_other, test_push_pushables);
+    
+    tcase_add_test(tc_other, test_set_switches_null);
+    tcase_add_test(tc_other, test_set_switches_reg);
+    tcase_add_test(tc_other, test_set_switches_overwrite);
 
     // Add the test case to the suite
     suite_add_tcase(s, tc_create);
