@@ -341,7 +341,10 @@ def load_player_info(path) -> tuple[bool, UserInfo]:
     try:
         with open(path, "r", encoding="utf-8") as file:
             data = json.load(file)
-        return True, UserInfo.from_dict(data)
+        try:
+            return True, UserInfo.from_dict(data)
+        except KeyError:
+            return False, UserInfo()
 
     except json.JSONDecodeError:
         return False, UserInfo()
