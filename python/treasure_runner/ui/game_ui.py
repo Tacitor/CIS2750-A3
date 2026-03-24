@@ -275,7 +275,7 @@ class GameUI:
         stdscr.clear()
         safe_addstr_colour(stdscr, 0, 0, self.game_name, curses.color_pair(1))
         safe_addstr_colour(stdscr, 1, 0, "is a Sokoban-style puzzle game.", curses.color_pair(self.colour_magenta))
-        safe_addstr_colour(stdscr, 2, 0, "Take control of Julia as she explores a world of mazes on her search for treasures.", curses.color_pair(self.colour_magenta))
+        safe_addstr_colour(stdscr, 2, 0, "Take control of Julia as she explores a world of mazes on her search for gold.", curses.color_pair(self.colour_magenta))
 
     def _splash_quit(self , stdscr):
         stdscr.clear()
