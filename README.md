@@ -1,6 +1,6 @@
 # A3 CIS\*2750
 
-## Download and Run Instructions\
+## Download and Run Instructions
 
 ### Download via Git (preferred)
 1. Ensure that you have git installed. On debian based Linux run the command `sudo apt install git`
