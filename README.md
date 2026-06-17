@@ -1,6 +1,10 @@
 # A3 CIS\*2750
 
-## Download and Run Instructions
+## Download and Run Instructions\
+
+### Download via Git (preferred)
+1. Ensure that you have git installed. On debian based Linux run the command `sudo apt install git`
+2. Navigate to the folder where you would like to have a new folder called `CIS2750-A3` and run `git clone --branch v1.0 --depth 1 https://github.com/Tacitor/CIS2750-A3.git` for the 1.0 initial release of the game.
 
 ### Prerequisites
 1. Need to run on Linux preferable Debian based
