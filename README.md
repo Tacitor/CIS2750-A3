@@ -1,4 +1,4 @@
-# A3 CIS\*2750
+# Julia's Jubilant Journey - A3 CIS\*2750
 
 ## Download and Run Instructions
 
