@@ -6,6 +6,11 @@
 1. Ensure that you have git installed. On debian based Linux run the command `sudo apt install git`
 2. Navigate to the folder where you would like to have a new folder called `CIS2750-A3` and run `git clone --branch v1.0 --depth 1 https://github.com/Tacitor/CIS2750-A3.git` for the 1.0 initial release of the game.
 
+### Download via GitHut Release (NOT preferred)
+1. Go to [https://github.com/Tacitor/CIS2750-A3/releases](https://github.com/Tacitor/CIS2750-A3/releases) and select the release of your choosing. The initial 1.0 is recommended.
+2. Download the source code (either `zip` or `tar.gz`)
+3. Upzip the source code and now you should have a `CIS2750-A3` folder
+
 ### Prerequisites
 1. Need to run on Linux preferable Debian based
 2. `make`
